@@ -15,6 +15,26 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    @role('admin')
+                        <x-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.index')">
+                            {{ __('Categorías') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('categories.create')" :active="request()->routeIs('categories.create')">
+                            {{ __('Crear categoría') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('posts.index')" :active="request()->routeIs('posts.index')">
+                            {{ __('Posts') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('posts.create')" :active="request()->routeIs('posts.create')">
+                            {{ __('Crear post') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('integrations.index')" :active="request()->routeIs('integrations.*')">
+                            {{ __('Integraciones') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('settings.edit')" :active="request()->routeIs('settings.*')">
+                            {{ __('Configuración') }}
+                        </x-nav-link>
+                    @endrole
                 </div>
             </div>
 
@@ -70,6 +90,26 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            @role('admin')
+                <x-responsive-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.index')">
+                    {{ __('Categorías') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('categories.create')" :active="request()->routeIs('categories.create')">
+                    {{ __('Crear categoría') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('posts.index')" :active="request()->routeIs('posts.index')">
+                    {{ __('Posts') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('posts.create')" :active="request()->routeIs('posts.create')">
+                    {{ __('Crear post') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('integrations.index')" :active="request()->routeIs('integrations.*')">
+                    {{ __('Integraciones') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('settings.edit')" :active="request()->routeIs('settings.*')">
+                    {{ __('Configuración') }}
+                </x-responsive-nav-link>
+            @endrole
         </div>
 
         <!-- Responsive Settings Options -->
