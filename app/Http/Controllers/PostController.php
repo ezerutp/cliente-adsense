@@ -34,6 +34,7 @@ class PostController extends Controller
             'categories' => $this->categoriesForSelect(),
             'integrations' => $this->activeIntegrations(),
             'postCardColorSuggestions' => $this->postCardColorSuggestions(),
+            'cardTemplates' => $this->cardTemplates(),
         ]);
     }
 
@@ -62,6 +63,7 @@ class PostController extends Controller
             'integrations' => $this->activeIntegrations(),
             'post' => $post,
             'postCardColorSuggestions' => $this->postCardColorSuggestions(),
+            'cardTemplates' => $this->cardTemplates(),
         ]);
     }
 
@@ -323,6 +325,16 @@ class PostController extends Controller
             ->where('is_active', true)
             ->get()
             ->keyBy('provider');
+    }
+
+    private function cardTemplates()
+    {
+        return PostCard::query()
+            ->whereNull('post_id')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('title')
+            ->get(['id', 'title', 'color', 'fields']);
     }
 
     /**

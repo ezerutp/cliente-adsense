@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,11 +17,107 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Resetear cache de permisos
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Crear permisos
+        $permissions = [
+            // Posts
+            'posts.view',
+            'posts.create',
+            'posts.edit',
+            'posts.delete',
+            'posts.publish',
+            
+            // Categorías
+            'categories.view',
+            'categories.create',
+            'categories.edit',
+            'categories.delete',
+            
+            // Cards
+            'cards.view',
+            'cards.create',
+            'cards.edit',
+            'cards.delete',
+            
+            // Integraciones
+            'integrations.view',
+            'integrations.create',
+            'integrations.edit',
+            'integrations.delete',
+            
+            // Configuración del sitio
+            'site-settings.view',
+            'site-settings.edit',
+            
+            // Usuarios
+            'users.view',
+            'users.create',
+            'users.edit',
+            'users.delete',
+            
+            // Roles y permisos
+            'roles.view',
+            'roles.edit',
+        ];
+
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
+        }
+
+        // Crear roles y asignar permisos
+        
+        // Rol Admin: tiene todos los permisos
+        $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        $adminRole->syncPermissions(Permission::all());
+        
+        // Rol Editor: puede gestionar contenido pero no configuración
+        $editorRole = Role::firstOrCreate(['name' => 'editor']);
+        $editorRole->syncPermissions([
+            'posts.view',
+            'posts.create',
+            'posts.edit',
+            'posts.delete',
+            'posts.publish',
+            'categories.view',
+            'categories.create',
+            'categories.edit',
+            'categories.delete',
+            'cards.view',
+            'cards.create',
+            'cards.edit',
+            'cards.delete',
+            'integrations.view',
         ]);
+        
+        // Rol Viewer: solo puede ver contenido
+        $viewerRole = Role::firstOrCreate(['name' => 'viewer']);
+        $viewerRole->syncPermissions([
+            'posts.view',
+            'categories.view',
+            'cards.view',
+            'integrations.view',
+        ]);
+
+        // Crear usuario administrador
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@test.com'],
+            [
+                'name' => 'Administrador',
+                'password' => 'Vidarte;123',
+            ]
+        );
+
+        // Asignar rol admin
+        if (!$admin->hasRole('admin')) {
+            $admin->assignRole($adminRole);
+        }
+
+        $this->command->info('✓ Roles creados: admin, editor, viewer');
+        $this->command->info('✓ ' . count($permissions) . ' permisos creados y vinculados');
+        $this->command->info('✓ Usuario administrador creado exitosamente.');
+        $this->command->info('  Email: admin@test.com');
+        $this->command->info('  Contraseña: Vidarte;123');
     }
 }

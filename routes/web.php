@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\IntegrationController;
+use App\Http\Controllers\PostCardController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SiteSettingController;
@@ -116,6 +117,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::resource('dashboard/posts', PostController::class)
         ->except('show')
         ->names('posts');
+
+    Route::patch('dashboard/post-cards/{postCard}/toggle-visibility', [PostCardController::class, 'toggleVisibility'])
+        ->name('post-cards.toggle-visibility');
+
+    Route::resource('dashboard/post-cards', PostCardController::class)
+        ->except('show')
+        ->names('post-cards');
 
     Route::patch('dashboard/integrations/{integration}/toggle-visibility', [IntegrationController::class, 'toggleVisibility'])
         ->name('integrations.toggle-visibility');

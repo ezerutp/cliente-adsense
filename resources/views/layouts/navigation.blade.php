@@ -16,17 +16,14 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
                     @role('admin')
-                        <x-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.index')">
+                        <x-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">
                             {{ __('Categorías') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('categories.create')" :active="request()->routeIs('categories.create')">
-                            {{ __('Crear categoría') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('posts.index')" :active="request()->routeIs('posts.index')">
+                        <x-nav-link :href="route('posts.index')" :active="request()->routeIs('posts.*')">
                             {{ __('Posts') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('posts.create')" :active="request()->routeIs('posts.create')">
-                            {{ __('Crear post') }}
+                        <x-nav-link :href="route('post-cards.index')" :active="request()->routeIs('post-cards.*')">
+                            {{ __('Cards') }}
                         </x-nav-link>
                         <x-nav-link :href="route('integrations.index')" :active="request()->routeIs('integrations.*')">
                             {{ __('Integraciones') }}
@@ -91,17 +88,14 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
             @role('admin')
-                <x-responsive-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.index')">
+                <x-responsive-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">
                     {{ __('Categorías') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('categories.create')" :active="request()->routeIs('categories.create')">
-                    {{ __('Crear categoría') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('posts.index')" :active="request()->routeIs('posts.index')">
+                <x-responsive-nav-link :href="route('posts.index')" :active="request()->routeIs('posts.*')">
                     {{ __('Posts') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('posts.create')" :active="request()->routeIs('posts.create')">
-                    {{ __('Crear post') }}
+                <x-responsive-nav-link :href="route('post-cards.index')" :active="request()->routeIs('post-cards.*')">
+                    {{ __('Cards') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('integrations.index')" :active="request()->routeIs('integrations.*')">
                     {{ __('Integraciones') }}

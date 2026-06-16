@@ -3,6 +3,7 @@
     $method = $method ?? 'POST';
     $submitLabel = $submitLabel ?? 'Guardar post';
     $integrations = collect($integrations ?? []);
+    $cardTemplates = collect($cardTemplates ?? []);
     $galleryValue = old('gallery_image_urls', $post ? implode("\n", $post->gallery_image_urls ?? []) : '');
     $tagsValue = old('tags', $post ? implode(', ', $post->tags ?? []) : '');
     $publishMode = old('publish_mode', $post?->published_at?->isFuture() ? 'scheduled' : 'immediate');
@@ -18,6 +19,7 @@
             'title' => $card->title,
             'color' => $card->color ?? '#E91E63',
             'is_active' => $card->is_active,
+            'isTemplate' => false,
             'fields' => collect($card->fields ?? [])->map(fn ($field) => [
                 'key' => $field['key'] ?? '',
                 'value' => $field['value'] ?? '',
@@ -32,6 +34,7 @@
     x-data="{
         publishMode: @js($publishMode),
         cards: @js($postCardsInitial),
+        cardTemplates: @js($cardTemplates->toArray()),
         cardColorSuggestions: @js($postCardColorSuggestions['byTitle'] ?? []),
         reusableCardColors: @js($postCardColorSuggestions['colors'] ?? []),
         addCard() {
@@ -40,7 +43,24 @@
                 color: '#E91E63',
                 colorTouched: false,
                 is_active: true,
+                isTemplate: false,
                 fields: [{ key: '', value: '' }],
+            });
+        },
+        addCardFromTemplate(templateId) {
+            const template = this.cardTemplates.find(t => t.id === parseInt(templateId));
+            if (!template) return;
+            
+            this.cards.push({
+                title: template.title,
+                color: template.color,
+                colorTouched: true,
+                is_active: true,
+                isTemplate: true,
+                fields: (template.fields || []).map(f => ({
+                    key: f.key || '',
+                    value: f.value || '',
+                })),
             });
         },
         normalizeTitle(value) {
@@ -259,19 +279,37 @@
     <section class="rounded-md border border-gray-200 p-4">
         <div class="flex items-center justify-between gap-4">
             <h3 class="text-sm font-semibold text-gray-900">Cards informativas</h3>
-            <button
-                type="button"
-                class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 text-gray-900 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
-                title="Agregar card"
-                aria-label="Agregar card"
-                x-on:click="addCard()"
-            >
-                <x-heroicon-o-plus class="h-5 w-[18px]" aria-hidden="true" />
-            </button>
+            <div class="flex gap-2">
+                <template x-if="cardTemplates.length > 0">
+                    <select
+                        class="rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        x-on:change="addCardFromTemplate($event.target.value); $event.target.value = ''"
+                    >
+                        <option value="">Usar plantilla...</option>
+                        <template x-for="template in cardTemplates" :key="template.id">
+                            <option x-bind:value="template.id" x-text="template.title"></option>
+                        </template>
+                    </select>
+                </template>
+                <button
+                    type="button"
+                    class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 text-gray-900 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                    title="Agregar card personalizada"
+                    aria-label="Agregar card personalizada"
+                    x-on:click="addCard()"
+                >
+                    <x-heroicon-o-plus class="h-5 w-[18px]" aria-hidden="true" />
+                </button>
+            </div>
         </div>
 
         <template x-if="cards.length === 0">
-            <p class="mt-3 text-sm text-gray-500">Agrega cards como Perfil, Atención o cualquier dato extra del post.</p>
+            <p class="mt-3 text-sm text-gray-500">
+                Agrega cards como Perfil, Atención o cualquier dato extra del post.
+                <template x-if="cardTemplates.length > 0">
+                    <span>Usa una plantilla o crea una personalizada.</span>
+                </template>
+            </p>
         </template>
 
         <div class="mt-4 space-y-4">
@@ -279,13 +317,21 @@
                 <div class="rounded-md border border-gray-200 bg-gray-50 p-4">
                     <div class="flex items-start justify-between gap-3">
                         <div class="w-full">
-                            <x-input-label value="Título de card" />
+                            <div class="flex items-center gap-2">
+                                <x-input-label value="Título de card" />
+                                <template x-if="card.isTemplate">
+                                    <span class="inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-800">
+                                        Plantilla
+                                    </span>
+                                </template>
+                            </div>
                             <x-text-input
                                 type="text"
                                 class="mt-1 block w-full"
                                 x-model="card.title"
                                 x-on:input="suggestCardColor(card)"
                                 x-bind:name="`post_cards[${cardIndex}][title]`"
+                                x-bind:readonly="card.isTemplate"
                                 placeholder="Perfil"
                             />
                         </div>
@@ -319,7 +365,7 @@
                             <input
                                 type="color"
                                 class="h-10 w-12 rounded-md border border-gray-300 bg-white p-1"
-                                x-bind:value="card.color || '#E91E63'"
+                                x-model="card.color"
                                 x-on:input="setCardColor(card, $event.target.value)"
                             >
                             <x-text-input
@@ -357,6 +403,8 @@
                                     class="block w-full"
                                     x-model="field.key"
                                     x-bind:name="`post_cards[${cardIndex}][fields][${fieldIndex}][key]`"
+                                    x-bind:readonly="card.isTemplate"
+                                    x-bind:class="card.isTemplate ? 'bg-gray-100' : ''"
                                     placeholder="Clave"
                                 />
                                 <x-text-input
@@ -366,27 +414,31 @@
                                     x-bind:name="`post_cards[${cardIndex}][fields][${fieldIndex}][value]`"
                                     placeholder="Valor"
                                 />
-                                <button
-                                    type="button"
-                                    class="inline-flex size-10 items-center justify-center rounded-md border border-gray-300 text-gray-900 transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
-                                    title="Eliminar dato"
-                                    aria-label="Eliminar dato"
-                                    x-on:click="removeField(card, fieldIndex)"
-                                >
-                                    <x-heroicon-o-x-mark class="h-5 w-[18px]" aria-hidden="true" />
-                                </button>
+                                <template x-if="!card.isTemplate">
+                                    <button
+                                        type="button"
+                                        class="inline-flex size-10 items-center justify-center rounded-md border border-gray-300 text-gray-900 transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                                        title="Eliminar dato"
+                                        aria-label="Eliminar dato"
+                                        x-on:click="removeField(card, fieldIndex)"
+                                    >
+                                        <x-heroicon-o-x-mark class="h-5 w-[18px]" aria-hidden="true" />
+                                    </button>
+                                </template>
                             </div>
                         </template>
                     </div>
 
-                    <button
-                        type="button"
-                        class="mt-4 inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-900 transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
-                        x-on:click="addField(card)"
-                    >
-                        <x-heroicon-o-plus class="h-5 w-[18px]" aria-hidden="true" />
-                        Agregar dato
-                    </button>
+                    <template x-if="!card.isTemplate">
+                        <button
+                            type="button"
+                            class="mt-4 inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-900 transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                            x-on:click="addField(card)"
+                        >
+                            <x-heroicon-o-plus class="h-5 w-[18px]" aria-hidden="true" />
+                            Agregar dato
+                        </button>
+                    </template>
                 </div>
             </template>
         </div>

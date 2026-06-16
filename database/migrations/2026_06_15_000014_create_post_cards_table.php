@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('post_cards', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('post_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('post_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('title');
             $table->json('fields')->nullable();
             $table->unsignedInteger('sort_order')->default(0);
