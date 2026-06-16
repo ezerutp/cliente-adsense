@@ -17,8 +17,8 @@
     <body class="font-sans text-gray-900 antialiased">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
             <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+                <a href="/" class="grid size-16 place-items-center rounded-2xl bg-[#E91E63] shadow-sm shadow-[#E91E63]/25 transition hover:bg-[#D81B60] focus:outline-none focus:ring-2 focus:ring-[#E91E63] focus:ring-offset-2" aria-label="Ir al inicio">
+                    <x-application-logo class="size-11" />
                 </a>
             </div>
 

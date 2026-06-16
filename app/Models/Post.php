@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
     'title',
     'slug',
     'subtitle',
+    'location',
     'body',
     'cover_image_url',
     'gallery_image_urls',

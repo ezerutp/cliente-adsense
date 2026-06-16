@@ -119,8 +119,18 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-6 py-12 text-center text-sm text-gray-500">
-                                        Todavía no hay integraciones creadas.
+                                    <td colspan="6" class="px-6 py-12 text-center">
+                                        <div class="flex flex-col items-center justify-center gap-3">
+                                            <x-heroicon-o-rectangle-stack class="h-12 w-12 text-gray-400" />
+                                            <p class="text-sm font-medium text-gray-500">No hay integraciones creadas</p>
+                                            <a
+                                                href="{{ route('integrations.create') }}"
+                                                class="mt-2 inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                            >
+                                                <x-heroicon-o-plus class="h-5 w-5" />
+                                                Crear primera integración
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforelse

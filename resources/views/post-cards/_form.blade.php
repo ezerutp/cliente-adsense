@@ -4,6 +4,7 @@
     $submitLabel = $submitLabel ?? 'Guardar card';
     $fieldsValue = old('fields', $postCard?->fields ?? []);
     $colorValue = old('color', $postCard?->color ?? '#E91E63');
+    $fillBackgroundValue = old('fill_background', $postCard?->fill_background ?? false);
 @endphp
 
 <form
@@ -63,6 +64,22 @@
         </div>
         <p class="mt-1 text-sm text-gray-500">Selecciona un color para la barra superior de la card</p>
         <x-input-error class="mt-2" :messages="$errors->get('color')" />
+    </div>
+
+    <div>
+        <label class="inline-flex items-center gap-3">
+            <input type="hidden" name="fill_background" value="0">
+            <input
+                type="checkbox"
+                name="fill_background"
+                value="1"
+                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                {{ $fillBackgroundValue ? 'checked' : '' }}
+            >
+            <span class="text-sm font-medium text-gray-700">Usar el color como fondo de toda la card</span>
+        </label>
+        <p class="mt-1 text-sm text-gray-500">Si está activo, la card pública se mostrará con el color elegido como fondo.</p>
+        <x-input-error class="mt-2" :messages="$errors->get('fill_background')" />
     </div>
 
     <div>

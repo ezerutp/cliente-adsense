@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'post_id',
     'title',
     'color',
+    'fill_background',
     'fields',
     'sort_order',
     'is_active',
@@ -21,6 +22,7 @@ class PostCard extends Model
     {
         return [
             'fields' => 'array',
+            'fill_background' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

@@ -80,13 +80,22 @@
                 </div>
 
                 <div class="p-6 md:p-8">
-                    <div class="mb-4 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#E91E63]">
-                        <a href="{{ route('categories.public.show', ['category' => $category->slug]) }}" class="hover:text-[#C2185B]">{{ $category->name }}</a>
-                        <span class="size-1 rounded-full bg-[#E5E7EB]"></span>
-                        <span>{{ $siteSettings->server_country }}</span>
-                        @if ($post->published_at)
+                    <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div class="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#E91E63]">
+                            <a href="{{ route('categories.public.show', ['category' => $category->slug]) }}" class="hover:text-[#C2185B]">{{ $category->name }}</a>
                             <span class="size-1 rounded-full bg-[#E5E7EB]"></span>
-                            <span>{{ $post->published_at->diffForHumans() }}</span>
+                            <span>{{ $siteSettings->server_country }}</span>
+                            @if ($post->published_at)
+                                <span class="size-1 rounded-full bg-[#E5E7EB]"></span>
+                                <span>{{ $post->published_at->diffForHumans() }}</span>
+                            @endif
+                        </div>
+
+                        @if ($post->location)
+                            <div class="inline-flex items-center gap-2 self-start rounded-full bg-[#F3F4F6] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.08em] text-[#374151] sm:justify-end">
+                                <x-heroicon-o-map-pin class="size-4 text-[#E91E63]" aria-hidden="true" />
+                                <span>{{ $post->location }}</span>
+                            </div>
                         @endif
                     </div>
 
@@ -104,8 +113,8 @@
                         </div>
                     @endif
 
-                    <div class="prose prose-neutral mt-10 max-w-none whitespace-pre-line text-[#374151]">
-                        {{ $post->body }}
+                    <div class="prose prose-neutral mt-10 max-w-none space-y-4 text-[#374151]">
+                        {!! \App\Support\PostBodyRenderer::render($post->body) !!}
                     </div>
 
                     @if ($gallery->isNotEmpty())
@@ -142,15 +151,24 @@
         <aside class="space-y-5 lg:col-span-1">
             <div class="sticky top-24 space-y-5">
                 @foreach ($postCards as $card)
-                    <section class="overflow-hidden rounded-3xl border border-[#E5E7EB] bg-white shadow-sm">
-                        <div class="h-1.5" style="background-color: {{ $card->color ?? '#E91E63' }};"></div>
+                    @php
+                        $cardColor = $card->color ?? '#E91E63';
+                        $fillsBackground = (bool) ($card->fill_background ?? false);
+                    @endphp
+                    <section
+                        class="overflow-hidden rounded-3xl border shadow-sm {{ $fillsBackground ? 'border-transparent text-white' : 'border-[#E5E7EB] bg-white' }}"
+                        @if ($fillsBackground) style="background-color: {{ $cardColor }};" @endif
+                    >
+                        @unless ($fillsBackground)
+                            <div class="h-1.5" style="background-color: {{ $cardColor }};"></div>
+                        @endunless
                         <div class="p-5">
-                        <h2 class="text-lg font-bold text-[#222222]">{{ $card->title }}</h2>
+                        <h2 class="text-lg font-bold {{ $fillsBackground ? 'text-white' : 'text-[#222222]' }}">{{ $card->title }}</h2>
                         <dl class="mt-4 space-y-3">
                             @foreach ($card->fields ?? [] as $field)
-                                <div class="flex items-start justify-between gap-4 border-b border-[#F3F4F6] pb-3 last:border-b-0 last:pb-0">
-                                    <dt class="text-sm font-semibold text-[#6B7280]">{{ $field['key'] ?? '' }}</dt>
-                                    <dd class="text-right text-sm font-bold text-[#222222]">{{ $field['value'] ?? '' }}</dd>
+                                <div class="flex items-start justify-between gap-4 border-b pb-3 last:border-b-0 last:pb-0 {{ $fillsBackground ? 'border-white/25' : 'border-[#F3F4F6]' }}">
+                                    <dt class="text-sm font-semibold {{ $fillsBackground ? 'text-white/80' : 'text-[#6B7280]' }}">{{ $field['key'] ?? '' }}</dt>
+                                    <dd class="text-right text-sm font-bold {{ $fillsBackground ? 'text-white' : 'text-[#222222]' }}">{{ $field['value'] ?? '' }}</dd>
                                 </div>
                             @endforeach
                         </dl>
@@ -160,8 +178,6 @@
 
                 <section class="rounded-3xl border border-[#E5E7EB] bg-white p-5 shadow-sm">
                     <p class="text-xs font-semibold uppercase tracking-[0.12em] text-[#E91E63]">Contacto</p>
-                    <h2 class="mt-2 text-xl font-bold text-[#222222]">Comunícate con este post</h2>
-                    <p class="mt-3 text-sm leading-6 text-[#6B7280]">Elige una integración disponible para abrir el canal configurado.</p>
 
                     <div class="mt-5 space-y-3">
                         @foreach ($contactButtons as $contact)
@@ -183,10 +199,6 @@
                         <p class="mt-5 rounded-2xl border border-dashed border-[#E5E7EB] p-4 text-sm text-[#6B7280]">
                             Este post todavía no tiene canales de contacto activos.
                         </p>
-                    @else
-                        <div class="mt-5 rounded-2xl bg-[#F8F8F8] p-4 text-xs leading-5 text-[#6B7280]">
-                            Los enlaces se generan desde las integraciones activas del sistema.
-                        </div>
                     @endif
                 </section>
             </div>

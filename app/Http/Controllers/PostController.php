@@ -131,6 +131,7 @@ class PostController extends Controller
      *     title: string,
      *     slug?: string|null,
      *     subtitle?: string|null,
+     *     location?: string|null,
      *     body: string,
      *     cover_image_url?: string|null,
      *     gallery_image_urls: array<int, string>,
@@ -146,6 +147,7 @@ class PostController extends Controller
             'category_id' => ['required', 'integer', Rule::exists('categories', 'id')],
             'title' => ['required', 'string', 'max:255'],
             'subtitle' => ['nullable', 'string', 'max:255'],
+            'location' => ['nullable', 'string', 'max:255'],
             'body' => ['required', 'string'],
             'cover_image_url' => ['nullable', 'url', 'max:2048'],
             'gallery_image_urls' => ['nullable', 'string'],
@@ -162,6 +164,9 @@ class PostController extends Controller
 
         $this->validatePublicationWindow($data);
 
+        $data['location'] = filled($data['location'] ?? null)
+            ? trim((string) $data['location'])
+            : null;
         $data['gallery_image_urls'] = $this->linesToArray($data['gallery_image_urls'] ?? null);
         $data['tags'] = $this->tagsToArray($data['tags'] ?? null);
         $data = array_merge($data, $this->buildContactUrls($data));
@@ -231,7 +236,7 @@ class PostController extends Controller
     }
 
     /**
-     * @return array<int, array{title: string, color: string, fields: array<int, array{key: string, value: string}>, is_active: bool}>
+     * @return array<int, array{title: string, color: string, fill_background: bool, fields: array<int, array{key: string, value: string}>, is_active: bool}>
      */
     private function validatedCards(Request $request): array
     {
@@ -239,6 +244,7 @@ class PostController extends Controller
             'post_cards' => ['nullable', 'array'],
             'post_cards.*.title' => ['nullable', 'string', 'max:120'],
             'post_cards.*.color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'post_cards.*.fill_background' => ['nullable', 'boolean'],
             'post_cards.*.is_active' => ['nullable', 'boolean'],
             'post_cards.*.fields' => ['nullable', 'array'],
             'post_cards.*.fields.*.key' => ['nullable', 'string', 'max:80'],
@@ -259,6 +265,7 @@ class PostController extends Controller
                 return [
                     'title' => trim((string) ($card['title'] ?? '')),
                     'color' => $card['color'] ?? '#E91E63',
+                    'fill_background' => filter_var($card['fill_background'] ?? false, FILTER_VALIDATE_BOOLEAN),
                     'fields' => $fields,
                     'is_active' => filter_var($card['is_active'] ?? true, FILTER_VALIDATE_BOOLEAN),
                 ];
@@ -269,7 +276,7 @@ class PostController extends Controller
     }
 
     /**
-     * @param array<int, array{title: string, color: string, fields: array<int, array{key: string, value: string}>, is_active: bool}> $cards
+     * @param array<int, array{title: string, color: string, fill_background: bool, fields: array<int, array{key: string, value: string}>, is_active: bool}> $cards
      */
     private function syncCards(Post $post, array $cards): void
     {
@@ -279,6 +286,7 @@ class PostController extends Controller
             $post->cards()->create([
                 'title' => $card['title'],
                 'color' => $card['color'],
+                'fill_background' => $card['fill_background'],
                 'fields' => $card['fields'],
                 'sort_order' => $index,
                 'is_active' => $card['is_active'],
@@ -334,7 +342,7 @@ class PostController extends Controller
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->orderBy('title')
-            ->get(['id', 'title', 'color', 'fields']);
+            ->get(['id', 'title', 'color', 'fill_background', 'fields']);
     }
 
     /**

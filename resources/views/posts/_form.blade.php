@@ -13,11 +13,23 @@
     $defaultDialCode = \App\Models\SiteSetting::SERVER_COUNTRIES[$siteSettings->server_country]['dial_code'] ?? '51';
     $postCardColorSuggestions = $postCardColorSuggestions ?? ['byTitle' => [], 'colors' => []];
     $postCardsValue = old('post_cards');
+    $normalizePostCard = fn (array $card) => [
+        'title' => $card['title'] ?? '',
+        'color' => $card['color'] ?? '#E91E63',
+        'fill_background' => filter_var($card['fill_background'] ?? false, FILTER_VALIDATE_BOOLEAN),
+        'is_active' => filter_var($card['is_active'] ?? true, FILTER_VALIDATE_BOOLEAN),
+        'isTemplate' => filter_var($card['isTemplate'] ?? false, FILTER_VALIDATE_BOOLEAN),
+        'fields' => collect($card['fields'] ?? [])->map(fn ($field) => [
+            'key' => $field['key'] ?? '',
+            'value' => $field['value'] ?? '',
+        ])->values()->all(),
+    ];
     $postCardsInitial = $postCardsValue !== null
-        ? array_values($postCardsValue)
+        ? collect($postCardsValue)->map(fn ($card) => $normalizePostCard($card))->values()->all()
         : ($post?->cards?->map(fn ($card) => [
             'title' => $card->title,
             'color' => $card->color ?? '#E91E63',
+            'fill_background' => $card->fill_background ?? false,
             'is_active' => $card->is_active,
             'isTemplate' => false,
             'fields' => collect($card->fields ?? [])->map(fn ($field) => [
@@ -37,11 +49,27 @@
         cardTemplates: @js($cardTemplates->toArray()),
         cardColorSuggestions: @js($postCardColorSuggestions['byTitle'] ?? []),
         reusableCardColors: @js($postCardColorSuggestions['colors'] ?? []),
+        emojiPickerOpen: false,
+        emojiGroups: [
+            {
+                label: 'Favoritos',
+                emojis: ['🔥', '💋', '❤️', '✨', '⭐', '📍', '📞', '✅'],
+            },
+            {
+                label: 'Caritas',
+                emojis: ['😀', '😄', '😉', '😍', '😘', '😈', '🤩', '😎', '🥰', '😋', '😇', '🤭'],
+            },
+            {
+                label: 'Símbolos',
+                emojis: ['💕', '💖', '💎', '🌹', '🎀', '👑', '⚡', '🔞', '🕒', '💯', '🎉', '📸'],
+            },
+        ],
         addCard() {
             this.cards.push({
                 title: '',
                 color: '#E91E63',
                 colorTouched: false,
+                fill_background: false,
                 is_active: true,
                 isTemplate: false,
                 fields: [{ key: '', value: '' }],
@@ -55,6 +83,7 @@
                 title: template.title,
                 color: template.color,
                 colorTouched: true,
+                fill_background: Boolean(template.fill_background),
                 is_active: true,
                 isTemplate: true,
                 fields: (template.fields || []).map(f => ({
@@ -85,6 +114,35 @@
         },
         removeField(card, fieldIndex) {
             card.fields.splice(fieldIndex, 1);
+        },
+        insertIntoBody(value, selectionFallback = '') {
+            const textarea = this.$refs.body;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selected = textarea.value.slice(start, end);
+            const insert = value.replace('__selection__', selected || selectionFallback);
+
+            textarea.setRangeText(insert, start, end, 'end');
+            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+            textarea.focus();
+        },
+        insertEmoji(emoji) {
+            this.insertIntoBody(emoji);
+            this.emojiPickerOpen = false;
+        },
+        insertLink() {
+            const url = window.prompt('URL del enlace');
+
+            if (!url) return;
+
+            this.insertIntoBody(`[__selection__](${url})`, 'Texto del enlace');
+        },
+        insertImage() {
+            const url = window.prompt('URL de la imagen');
+
+            if (!url) return;
+
+            this.insertIntoBody(`\n![Imagen](${url})\n`);
         },
     }"
 >
@@ -140,12 +198,100 @@
     </div>
 
     <div>
+        <x-input-label for="location" value="Ubicación" />
+        <x-text-input
+            id="location"
+            name="location"
+            type="text"
+            class="mt-1 block w-full"
+            :value="old('location', $post?->location)"
+            placeholder="Lima, Miraflores, San Isidro..."
+        />
+        <x-input-error class="mt-2" :messages="$errors->get('location')" />
+    </div>
+
+    <div>
         <x-input-label for="body" value="Texto" />
+        <div class="mt-2 flex flex-wrap items-center gap-2 rounded-t-md border border-b-0 border-gray-300 bg-gray-50 p-2">
+            @foreach (['🔥', '💋', '❤️', '✨', '⭐', '📍', '📞', '✅'] as $emoji)
+                <button
+                    type="button"
+                    class="inline-flex size-9 items-center justify-center rounded-md text-lg transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                    title="Insertar {{ $emoji }}"
+                    aria-label="Insertar {{ $emoji }}"
+                    x-on:click="insertEmoji('{{ $emoji }}')"
+                >
+                    {{ $emoji }}
+                </button>
+            @endforeach
+
+            <div class="relative" x-on:click.outside="emojiPickerOpen = false">
+                <button
+                    type="button"
+                    class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 bg-white text-lg transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                    title="Elegir emoji"
+                    aria-label="Elegir emoji"
+                    x-on:click="emojiPickerOpen = ! emojiPickerOpen"
+                    x-bind:aria-expanded="emojiPickerOpen.toString()"
+                >
+                    ☺
+                </button>
+
+                <div
+                    x-show="emojiPickerOpen"
+                    x-cloak
+                    x-transition
+                    class="absolute left-0 z-20 mt-2 w-72 rounded-md border border-gray-200 bg-white p-3 shadow-lg"
+                >
+                    <template x-for="group in emojiGroups" :key="group.label">
+                        <div class="mb-3 last:mb-0">
+                            <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500" x-text="group.label"></p>
+                            <div class="grid grid-cols-8 gap-1">
+                                <template x-for="emoji in group.emojis" :key="emoji">
+                                    <button
+                                        type="button"
+                                        class="inline-flex size-8 items-center justify-center rounded-md text-lg transition hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1"
+                                        x-on:click="insertEmoji(emoji)"
+                                        x-bind:title="`Insertar ${emoji}`"
+                                        x-bind:aria-label="`Insertar ${emoji}`"
+                                    >
+                                        <span x-text="emoji"></span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <span class="mx-1 h-6 w-px bg-gray-300"></span>
+
+            <button
+                type="button"
+                class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-900 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                title="Insertar URL"
+                aria-label="Insertar URL"
+                x-on:click="insertLink()"
+            >
+                <x-heroicon-o-link class="h-5 w-[18px]" aria-hidden="true" />
+            </button>
+
+            <button
+                type="button"
+                class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-900 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                title="Insertar imagen por URL"
+                aria-label="Insertar imagen por URL"
+                x-on:click="insertImage()"
+            >
+                <x-heroicon-o-photo class="h-5 w-[18px]" aria-hidden="true" />
+            </button>
+        </div>
         <textarea
             id="body"
             name="body"
             rows="7"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            x-ref="body"
+            class="block w-full rounded-b-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             required
         >{{ old('body', $post?->body) }}</textarea>
         <x-input-error class="mt-2" :messages="$errors->get('body')" />
@@ -394,6 +540,18 @@
                             </div>
                         </template>
                     </div>
+
+                    <label class="mt-3 inline-flex items-center gap-3">
+                        <input type="hidden" value="0" x-bind:name="`post_cards[${cardIndex}][fill_background]`">
+                        <input
+                            type="checkbox"
+                            value="1"
+                            class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                            x-model="card.fill_background"
+                            x-bind:name="`post_cards[${cardIndex}][fill_background]`"
+                        >
+                        <span class="text-sm font-medium text-gray-700">Usar color como fondo</span>
+                    </label>
 
                     <div class="mt-4 space-y-3">
                         <template x-for="(field, fieldIndex) in card.fields" :key="fieldIndex">

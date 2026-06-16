@@ -5,8 +5,10 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                    <a href="{{ url('/') }}" aria-label="Ir al inicio">
+                        <span class="grid size-9 place-items-center rounded-2xl bg-[#E91E63]" aria-hidden="true">
+                            <x-application-logo class="size-7" />
+                        </span>
                     </a>
                 </div>
 

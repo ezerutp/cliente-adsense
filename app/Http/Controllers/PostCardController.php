@@ -54,9 +54,12 @@ class PostCardController extends Controller
             abort(403, 'No puedes editar cards asociadas a posts.');
         }
 
+        $previousTitle = $postCard->title;
+        $previousColor = $postCard->color;
         $data = $this->validatedData($request);
 
         $postCard->update($data);
+        $this->syncCopiedCardPresentation($previousTitle, $previousColor, $data);
 
         return redirect()
             ->route('post-cards.index')
@@ -98,13 +101,14 @@ class PostCardController extends Controller
     }
 
     /**
-     * @return array{title: string, color: string, fields: array<int, array{key: string, value: string}>, is_active: bool, sort_order: int}
+     * @return array{title: string, color: string, fill_background: bool, fields: array<int, array{key: string, value: string}>, is_active: bool, sort_order: int}
      */
     private function validatedData(Request $request): array
     {
         $data = $request->validate([
             'title' => ['required', 'string', 'max:120'],
             'color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'fill_background' => ['nullable', 'boolean'],
             'is_active' => ['nullable', 'boolean'],
             'sort_order' => ['required', 'integer', 'min:0', 'max:999999'],
             'fields' => ['nullable', 'array'],
@@ -124,9 +128,25 @@ class PostCardController extends Controller
         return [
             'title' => trim($data['title']),
             'color' => $data['color'],
+            'fill_background' => filter_var($data['fill_background'] ?? false, FILTER_VALIDATE_BOOLEAN),
             'fields' => $fields,
             'is_active' => filter_var($data['is_active'] ?? true, FILTER_VALIDATE_BOOLEAN),
             'sort_order' => $data['sort_order'],
         ];
+    }
+
+    /**
+     * @param array{title: string, color: string, fill_background: bool, fields: array<int, array{key: string, value: string}>, is_active: bool, sort_order: int} $data
+     */
+    private function syncCopiedCardPresentation(string $previousTitle, string $previousColor, array $data): void
+    {
+        PostCard::query()
+            ->whereNotNull('post_id')
+            ->where('title', $previousTitle)
+            ->where('color', $previousColor)
+            ->update([
+                'color' => $data['color'],
+                'fill_background' => $data['fill_background'],
+            ]);
     }
 }
