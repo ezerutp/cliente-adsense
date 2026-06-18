@@ -1,58 +1,125 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Gatitas Hot
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Marketplace de publicaciones clasificadas construido con Laravel, Blade, Alpine.js y Tailwind CSS. El sistema combina una experiencia pública orientada al descubrimiento de posts con un panel administrativo para gestionar contenido, ubicaciones, integraciones, cards reutilizables y configuración visual.
 
-## About Laravel
+## Capacidades principales
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Portada pública con categorías, posts VIP, publicaciones recientes y directorio dinámico de ubicaciones.
+- Buscador con tres filtros opcionales y acumulativos: ubicación, categoría y palabra clave.
+- Navegación pública por categoría, ubicación (`/u/...`) y etiqueta (`/t/...`).
+- Detalle de post con galería modal circular, cards informativas y botones de contacto.
+- Publicación inmediata, programada y con fecha de finalización.
+- Panel administrativo protegido por autenticación, verificación de correo y rol `admin`.
+- Catálogo administrable de ubicaciones distritales del Perú.
+- Configuración de colores, portada, servidor y confirmación de mayoría de edad.
+- Roles y permisos mediante `spatie/laravel-permission`.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Capa | Tecnología |
+| --- | --- |
+| Backend | PHP 8.3+, Laravel 13 |
+| UI | Blade, Alpine.js, Tailwind CSS |
+| Assets | Vite |
+| Base de datos | SQLite por defecto; compatible con conexiones Laravel |
+| Autenticación | Laravel Breeze |
+| Autorización | Spatie Laravel Permission |
+| Iconos | Blade Heroicons |
+| Pruebas | PHPUnit |
 
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Inicio rápido
 
 ```bash
-composer require laravel/boost --dev
+composer install
+cp .env.example .env
+php artisan key:generate
 
-php artisan boost:install
+touch database/database.sqlite
+php artisan migrate --seed
+
+npm install
+npm run build
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Para desarrollo concurrente:
 
-## Contributing
+```bash
+composer dev
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+El seeder crea un usuario administrador local:
 
-## Code of Conduct
+```text
+Email: admin@test.com
+Contraseña: Vidarte;123
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Estas credenciales son exclusivamente de desarrollo y deben cambiarse o eliminarse en cualquier despliegue real.
 
-## Security Vulnerabilities
+## Reglas centrales del dominio
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Un post es públicamente visible cuando:
 
-## License
+1. Está activo.
+2. Su fecha de publicación es nula o ya ocurrió.
+3. Su fecha de finalización es nula o todavía no ocurrió.
+4. Su categoría está activa cuando se consulta desde módulos públicos globales.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+La ubicación del post es obligatoria y debe existir en el catálogo `locations`.
+
+El buscador combina filtros con lógica `AND`:
+
+- Sin filtros: muestra todos los posts públicos.
+- Con uno, dos o tres filtros: aplica únicamente los criterios enviados.
+- La palabra clave revisa título, subtítulo, cuerpo y tags.
+
+## Estructura documental
+
+La documentación profunda vive en [`docs/`](docs/README.md):
+
+- [Arquitectura](docs/architecture.md)
+- [Instalación y operación](docs/development.md)
+- [Rutas y flujos HTTP](docs/routes.md)
+- [Configuración técnica](docs/configuration.md)
+- [Funciones y servicios internos](docs/technical-reference.md)
+- [Base de datos, migraciones y seeders](docs/database.md)
+- [Pruebas](docs/testing.md)
+- [Módulos funcionales](docs/modules/README.md)
+
+## Comandos útiles
+
+```bash
+php artisan route:list
+php artisan migrate:status
+php artisan db:seed
+php artisan view:cache
+php artisan test
+npm run dev
+npm run build
+```
+
+## Directorios relevantes
+
+```text
+app/Http/Controllers/   Casos de uso HTTP y validación
+app/Models/             Modelos Eloquent
+app/Support/            Consultas y transformaciones reutilizables
+database/migrations/    Evolución del esquema
+database/seeders/       Datos iniciales
+resources/views/        Vistas y componentes Blade
+resources/js/           Inicialización de Alpine
+resources/css/          Tailwind y estilos globales
+routes/                 Rutas públicas, administrativas y de autenticación
+tests/                  Pruebas unitarias y funcionales
+docs/                   Documentación técnica y funcional
+```
+
+## Seguridad operativa
+
+- No conservar las credenciales sembradas en producción.
+- Configurar `APP_DEBUG=false` en producción.
+- Servir el sitio con HTTPS.
+- Ejecutar migraciones con respaldo previo.
+- Revisar que el catálogo de integraciones no contenga secretos expuestos.
+- Actualmente las rutas administrativas se autorizan por `role:admin`; los permisos sembrados preparan una autorización más granular, pero no sustituyen ese middleware.

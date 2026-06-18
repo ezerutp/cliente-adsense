@@ -1,0 +1,87 @@
+# Rutas y flujos HTTP
+
+## Públicas
+
+| Método | Ruta | Nombre | Propósito |
+| --- | --- | --- | --- |
+| GET | `/` | — | Inicio |
+| GET | `/buscar` | `posts.search` | Búsqueda combinada |
+| GET | `/u` | `posts.locations.index` | Directorio de ubicaciones |
+| GET | `/u/{location}` | `posts.locations.show` | Posts por ubicación |
+| GET | `/t` | `posts.tags.index` | Directorio de etiquetas |
+| GET | `/t/{tag}` | `posts.tags.show` | Posts por etiqueta |
+| GET | `/{category}` | `categories.public.show` | Posts de categoría |
+| GET | `/{category}/{post}` | `posts.public.show` | Detalle del post |
+
+Las rutas dinámicas de categoría se declaran al final para no capturar `/buscar`, `/u`, `/t` y rutas del sistema.
+
+## Dashboard
+
+Requiere:
+
+```text
+auth
+verified
+role:admin
+```
+
+### Categorías
+
+CRUD bajo `/dashboard/categories` y:
+
+```text
+PATCH /dashboard/categories/{category}/toggle-visibility
+```
+
+### Posts
+
+CRUD bajo `/dashboard/posts` y:
+
+```text
+PATCH /dashboard/posts/{post}/toggle-visibility
+PATCH /dashboard/posts/{post}/toggle-vip
+```
+
+### Cards
+
+CRUD de plantillas bajo `/dashboard/post-cards` y toggle de visibilidad.
+
+### Integraciones
+
+CRUD bajo `/dashboard/integrations` y toggle de visibilidad.
+
+### Configuración
+
+```text
+GET    /dashboard/settings
+PUT    /dashboard/settings
+POST   /dashboard/settings/locations
+PUT    /dashboard/settings/locations/{location}
+DELETE /dashboard/settings/locations/{location}
+```
+
+## Perfil
+
+Requiere autenticación:
+
+```text
+GET    /profile
+PATCH  /profile
+DELETE /profile
+```
+
+## Autenticación
+
+Laravel Breeze proporciona:
+
+- Login/logout.
+- Registro.
+- Confirmación de contraseña.
+- Recuperación y actualización de contraseña.
+- Verificación de correo.
+
+## Resolución de modelos
+
+- Categorías públicas usan `{category:slug}`.
+- Posts públicos usan `{post:slug}`.
+- El detalle valida además que el post pertenezca a la categoría recibida.
