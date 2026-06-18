@@ -22,6 +22,7 @@
             'admin_focus_color',
         ];
         $serverErrorFields = ['server_country', 'server_country_code', 'server_utc_offset'];
+        $footerErrorFields = ['footer_columns'];
         $ageGateErrorFields = [
             'age_gate_storage_key',
             'age_gate_badge',
@@ -32,13 +33,17 @@
             'age_gate_exit_href',
             'age_gate_legal_text',
         ];
+        $footerColumns = json_decode((string) old('footer_columns', ''), true);
+        $footerColumns = is_array($footerColumns) ? $footerColumns : $settings->footerColumnsConfig();
         $initialSection = request()->has('locations_page') || collect($locationErrorFields)->contains(fn ($field) => $errors->has($field))
             ? 'locations'
             : (collect($colorErrorFields)->contains(fn ($field) => $errors->has($field))
                 ? 'colors'
                 : (collect($serverErrorFields)->contains(fn ($field) => $errors->has($field))
                     ? 'server'
-                    : (collect($ageGateErrorFields)->contains(fn ($field) => $errors->has($field)) ? 'age' : 'cover')));
+                    : (collect($footerErrorFields)->contains(fn ($field) => $errors->has($field))
+                        ? 'footer'
+                        : (collect($ageGateErrorFields)->contains(fn ($field) => $errors->has($field)) ? 'age' : 'cover'))));
     @endphp
 
     <div
@@ -46,7 +51,7 @@
         x-data="{ section: @js($initialSection) }"
         x-init="
             const hashSection = window.location.hash.replace('#', '');
-            if (['cover', 'colors', 'server', 'age', 'locations'].includes(hashSection)) {
+            if (['cover', 'colors', 'server', 'footer', 'age', 'locations'].includes(hashSection)) {
                 section = hashSection;
             }
             $watch('section', value => history.replaceState(null, '', `#${value}`));
@@ -76,6 +81,7 @@
                             'cover' => ['Portada', 'Título, subtítulo e imagen'],
                             'colors' => ['Colores', 'Paleta pública y administrativa'],
                             'server' => ['Servidor', 'País, código y zona horaria'],
+                            'footer' => ['Footer', 'Columnas y enlaces públicos'],
                             'age' => ['Confirmación de edad', 'Contenido y botones del modal'],
                             'locations' => ['Ubicaciones', 'Distritos disponibles en posts'],
                         ] as $sectionKey => [$sectionLabel, $sectionDescription])
@@ -270,6 +276,129 @@
                                 />
                                 <x-input-error class="mt-2" :messages="$errors->get('server_utc_offset')" />
                             </div>
+                        </div>
+                    </section>
+
+                    <section
+                        x-show="section === 'footer'"
+                        x-cloak
+                        class="space-y-6"
+                        x-data="{
+                            columns: @js($footerColumns),
+                            addColumn() {
+                                if (this.columns.length >= 8) return;
+                                this.columns.push({
+                                    title: 'Nueva columna',
+                                    items: [{ label: 'Nuevo enlace', href: '/#' }],
+                                });
+                            },
+                            removeColumn(columnIndex) {
+                                if (this.columns.length <= 1) return;
+                                this.columns.splice(columnIndex, 1);
+                            },
+                            addItem(columnIndex) {
+                                if (this.columns[columnIndex].items.length >= 12) return;
+                                this.columns[columnIndex].items.push({ label: 'Nuevo enlace', href: '/#' });
+                            },
+                            removeItem(columnIndex, itemIndex) {
+                                if (this.columns[columnIndex].items.length <= 1) return;
+                                this.columns[columnIndex].items.splice(itemIndex, 1);
+                            },
+                        }"
+                    >
+                        <input type="hidden" name="footer_columns" x-bind:value="JSON.stringify(columns)">
+
+                        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900">Columnas del footer</h3>
+                                <p class="mt-1 max-w-2xl text-sm text-gray-600">
+                                    Agrega hasta 8 columnas. Cada elemento contiene el texto visible y su enlace.
+                                    Puedes usar rutas internas como <code class="rounded bg-gray-100 px-1 py-0.5">/#categorias</code>
+                                    o URLs completas.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                class="admin-button-primary shrink-0"
+                                x-on:click="addColumn"
+                                x-bind:disabled="columns.length >= 8"
+                            >
+                                Agregar columna
+                            </button>
+                        </div>
+
+                        <x-input-error class="mt-2" :messages="$errors->get('footer_columns')" />
+
+                        <div class="space-y-5">
+                            <template x-for="(column, columnIndex) in columns" x-bind:key="columnIndex">
+                                <article class="rounded-xl border border-gray-200 bg-gray-50 p-5">
+                                    <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+                                        <div class="min-w-0 flex-1">
+                                            <label class="block text-sm font-medium text-gray-700">Título de columna</label>
+                                            <input
+                                                type="text"
+                                                maxlength="80"
+                                                required
+                                                x-model="column.title"
+                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                            >
+                                        </div>
+                                        <button
+                                            type="button"
+                                            class="admin-button-danger-outline"
+                                            x-on:click="removeColumn(columnIndex)"
+                                            x-bind:disabled="columns.length <= 1"
+                                        >
+                                            Eliminar columna
+                                        </button>
+                                    </div>
+
+                                    <div class="mt-5 space-y-3">
+                                        <template x-for="(item, itemIndex) in column.items" x-bind:key="itemIndex">
+                                            <div class="grid gap-3 rounded-lg border border-gray-200 bg-white p-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_auto] md:items-end">
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700">Texto</label>
+                                                    <input
+                                                        type="text"
+                                                        maxlength="120"
+                                                        required
+                                                        x-model="item.label"
+                                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                    >
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700">Enlace</label>
+                                                    <input
+                                                        type="text"
+                                                        maxlength="2048"
+                                                        required
+                                                        x-model="item.href"
+                                                        placeholder="/#seccion o https://..."
+                                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                    >
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    class="admin-button-danger-outline"
+                                                    x-on:click="removeItem(columnIndex, itemIndex)"
+                                                    x-bind:disabled="column.items.length <= 1"
+                                                >
+                                                    Eliminar
+                                                </button>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        class="mt-4 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                        x-on:click="addItem(columnIndex)"
+                                        x-bind:disabled="column.items.length >= 12"
+                                    >
+                                        Agregar enlace
+                                    </button>
+                                </article>
+                            </template>
                         </div>
                     </section>
 

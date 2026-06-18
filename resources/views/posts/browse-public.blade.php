@@ -61,8 +61,8 @@
         brand-href="{{ url('/') }}"
         description="Clasificados premium con una experiencia moderna, clara y confiable."
         copyright="Todos los derechos reservados."
-        :groups="[]"
-        :legal-links="[]"
+        :groups="$siteSettings->footerGroups()"
+        :legal-links="$siteSettings->footerLegalLinks()"
     />
 
     <x-age-confirmation-modal :content="$ageGate" />

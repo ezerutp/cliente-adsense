@@ -23,9 +23,45 @@ use Illuminate\Support\Facades\Schema;
     'server_country',
     'server_country_code',
     'server_utc_offset',
+    'footer_columns',
 ])]
 class SiteSetting extends Model
 {
+    public const DEFAULT_FOOTER_COLUMNS = [
+        [
+            'title' => 'Información',
+            'items' => [
+                ['label' => 'Sobre nosotros', 'href' => '/#'],
+                ['label' => 'Categorías', 'href' => '/#categorias'],
+                ['label' => 'Publicar anuncio', 'href' => '/publicar-anuncio'],
+            ],
+        ],
+        [
+            'title' => 'Legal',
+            'items' => [
+                ['label' => 'Política de Privacidad', 'href' => '/#'],
+                ['label' => 'Términos y Condiciones', 'href' => '/#'],
+                ['label' => 'Aviso legal', 'href' => '/#'],
+            ],
+        ],
+        [
+            'title' => 'Ayuda',
+            'items' => [
+                ['label' => 'Centro de ayuda', 'href' => '/#'],
+                ['label' => 'Últimas publicaciones', 'href' => '/#recientes'],
+                ['label' => 'Reportar anuncio', 'href' => '/#'],
+            ],
+        ],
+        [
+            'title' => 'Contacto',
+            'items' => [
+                ['label' => 'Soporte', 'href' => '/#'],
+                ['label' => 'Comercial', 'href' => '/#'],
+                ['label' => 'Prensa', 'href' => '/#'],
+            ],
+        ],
+    ];
+
     public const DEFAULTS = [
         'site_title' => 'Encuentra perfiles destacados cerca de ti',
         'site_subtitle' => 'Explora anuncios verificados con filtros rápidos, experiencia limpia y una navegación diseñada para inspirar confianza.',
@@ -43,6 +79,7 @@ class SiteSetting extends Model
         'server_country' => 'Perú',
         'server_country_code' => 'PE',
         'server_utc_offset' => '-05:00',
+        'footer_columns' => self::DEFAULT_FOOTER_COLUMNS,
     ];
 
     public const SERVER_COUNTRIES = [
@@ -78,7 +115,63 @@ class SiteSetting extends Model
             return new self(self::DEFAULTS);
         }
 
-        return self::query()->firstOrCreate(['id' => 1], self::DEFAULTS);
+        $defaults = self::DEFAULTS;
+
+        if (! Schema::hasColumn('site_settings', 'footer_columns')) {
+            unset($defaults['footer_columns']);
+        }
+
+        return self::query()->firstOrCreate(['id' => 1], $defaults);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'footer_columns' => 'array',
+        ];
+    }
+
+    /**
+     * @return array<int, array{title: string, items: array<int, array{label: string, href: string}>}>
+     */
+    public function footerColumnsConfig(): array
+    {
+        $columns = is_array($this->footer_columns) ? $this->footer_columns : self::DEFAULT_FOOTER_COLUMNS;
+
+        return collect($columns)
+            ->filter(fn ($column): bool => is_array($column) && filled($column['title'] ?? null))
+            ->map(fn (array $column): array => [
+                'title' => trim((string) $column['title']),
+                'items' => collect($column['items'] ?? [])
+                    ->filter(fn ($item): bool => is_array($item) && filled($item['label'] ?? null) && filled($item['href'] ?? null))
+                    ->map(fn (array $item): array => [
+                        'label' => trim((string) $item['label']),
+                        'href' => trim((string) $item['href']),
+                    ])
+                    ->values()
+                    ->all(),
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<string, array<int, array{label: string, href: string}>>
+     */
+    public function footerGroups(): array
+    {
+        return collect($this->footerColumnsConfig())
+            ->mapWithKeys(fn (array $column): array => [$column['title'] => $column['items']])
+            ->all();
+    }
+
+    /**
+     * @return array<int, array{label: string, href: string}>
+     */
+    public function footerLegalLinks(): array
+    {
+        return collect($this->footerColumnsConfig())
+            ->first(fn (array $column): bool => mb_strtolower($column['title']) === 'legal')['items'] ?? [];
     }
 
     /**

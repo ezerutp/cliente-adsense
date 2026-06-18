@@ -103,3 +103,7 @@ navbar
 footer
 age-confirmation-modal
 ```
+
+El componente `footer` recibe sus columnas y enlaces desde
+`SiteSetting::footerGroups()`, por lo que todas las vistas públicas comparten la
+configuración administrada desde el dashboard.

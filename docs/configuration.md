@@ -98,6 +98,35 @@ Gestiona variables CSS públicas y administrativas:
 
 El componente `age-confirmation-modal` recuerda la confirmación en el navegador.
 
+### Footer
+
+El footer público se configura como columnas dinámicas. Cada columna contiene:
+
+- Título.
+- Uno o más elementos con texto y enlace.
+
+La estructura se almacena en `site_settings.footer_columns` como JSON:
+
+```json
+[
+  {
+    "title": "Información",
+    "items": [
+      {"label": "Categorías", "href": "/#categorias"},
+      {"label": "Publicar anuncio", "href": "/publicar-anuncio"}
+    ]
+  }
+]
+```
+
+El editor permite hasta 8 columnas y 12 enlaces por columna. Acepta rutas internas,
+anclas, URLs HTTP/HTTPS y enlaces `mailto:`, `tel:` o `sms:`. La columna titulada
+`Legal` también alimenta los enlaces legales de la franja inferior.
+
+`FooterSeeder` carga la estructura inicial al ejecutar `php artisan migrate --seed`
+o `php artisan db:seed`. Solo rellena el footer cuando no existe o está vacío, de
+modo que una configuración personalizada no se pierde.
+
 ### Ubicaciones
 
 - Alta, edición y eliminación.

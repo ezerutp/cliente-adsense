@@ -19,27 +19,6 @@
     $loginHref = \Illuminate\Support\Facades\Route::has('login') ? route('login') : '#';
     $publishHref = route('advertise');
 
-    $footerGroups = [
-        'Información' => [
-            ['label' => 'Inicio', 'href' => url('/')],
-            ['label' => 'Categoría', 'href' => route('categories.public.show', ['category' => $category->slug])],
-            ['label' => 'Publicar anuncio', 'href' => $publishHref],
-        ],
-        'Legal' => [
-            ['label' => 'Política de Privacidad', 'href' => '#'],
-            ['label' => 'Términos y Condiciones', 'href' => '#'],
-        ],
-        'Ayuda' => [
-            ['label' => 'Centro de ayuda', 'href' => '#'],
-            ['label' => 'Reportar anuncio', 'href' => '#'],
-        ],
-    ];
-
-    $legalLinks = [
-        ['label' => 'Política de Privacidad', 'href' => '#'],
-        ['label' => 'Términos y Condiciones', 'href' => '#'],
-    ];
-
     $ageGate = $ageGate ?? \App\Models\AgeGateSetting::current()->toModalContent();
 @endphp
 
@@ -251,8 +230,8 @@
         brand-href="{{ url('/') }}"
         description="Clasificados premium con una experiencia moderna, clara y confiable."
         copyright="Todos los derechos reservados."
-        :groups="$footerGroups"
-        :legal-links="$legalLinks"
+        :groups="$siteSettings->footerGroups()"
+        :legal-links="$siteSettings->footerLegalLinks()"
     />
 
     <x-post-image-gallery :images="$galleryImages" :title="$post->title" />

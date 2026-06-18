@@ -7,6 +7,8 @@ use App\Models\Location;
 use App\Models\SiteSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class SiteSettingController extends Controller
@@ -36,7 +38,7 @@ class SiteSettingController extends Controller
         $settings->update($data['site']);
         $ageGateSettings->update($data['age_gate']);
 
-        $section = in_array($request->input('settings_section'), ['cover', 'colors', 'server', 'age'], true)
+        $section = in_array($request->input('settings_section'), ['cover', 'colors', 'server', 'age', 'footer'], true)
             ? $request->input('settings_section')
             : 'cover';
 
@@ -45,7 +47,7 @@ class SiteSettingController extends Controller
     }
 
     /**
-     * @return array{site: array<string, string|null>, age_gate: array<string, bool|string>}
+     * @return array{site: array<string, mixed>, age_gate: array<string, bool|string>}
      */
     private function validatedData(Request $request): array
     {
@@ -68,6 +70,7 @@ class SiteSettingController extends Controller
             'server_country' => ['required', 'string', 'max:255'],
             'server_country_code' => ['required', 'string', 'max:8'],
             'server_utc_offset' => ['required', 'regex:/^[+-](0\d|1[0-4]):[0-5]\d$/'],
+            'footer_columns' => ['required', 'json', 'max:50000'],
             'age_gate_storage_key' => ['required', 'string', 'max:120', 'regex:/^[A-Za-z0-9_.:-]+$/'],
             'age_gate_badge' => ['required', 'string', 'max:24'],
             'age_gate_title' => ['required', 'string', 'max:255'],
@@ -77,6 +80,61 @@ class SiteSettingController extends Controller
             'age_gate_exit_href' => ['required', 'url', 'max:2048'],
             'age_gate_legal_text' => ['required', 'string', 'max:1000'],
         ]);
+
+        $footerColumns = json_decode($data['footer_columns'], true);
+
+        $footerValidator = Validator::make(
+            ['footer_columns' => $footerColumns],
+            [
+                'footer_columns' => ['required', 'array', 'min:1', 'max:8'],
+                'footer_columns.*.title' => ['required', 'string', 'max:80', 'distinct:ignore_case'],
+                'footer_columns.*.items' => ['required', 'array', 'min:1', 'max:12'],
+                'footer_columns.*.items.*.label' => ['required', 'string', 'max:120'],
+                'footer_columns.*.items.*.href' => [
+                    'required',
+                    'string',
+                    'max:2048',
+                    function (string $attribute, mixed $value, \Closure $fail): void {
+                        $href = trim((string) $value);
+
+                        if (
+                            ! str_starts_with($href, '/')
+                            && ! str_starts_with($href, '#')
+                            && ! preg_match('/^(https?:|mailto:|tel:|sms:)/i', $href)
+                        ) {
+                            $fail('El enlace debe ser una ruta interna, un ancla o una URL válida.');
+                        }
+                    },
+                ],
+            ],
+            [],
+            [
+                'footer_columns.*.title' => 'título de columna',
+                'footer_columns.*.items' => 'elementos de columna',
+                'footer_columns.*.items.*.label' => 'texto del enlace',
+                'footer_columns.*.items.*.href' => 'destino del enlace',
+            ],
+        );
+
+        if ($footerValidator->fails()) {
+            throw ValidationException::withMessages([
+                'footer_columns' => $footerValidator->errors()->first(),
+            ]);
+        }
+
+        $data['footer_columns'] = collect($footerColumns)
+            ->map(fn (array $column): array => [
+                'title' => trim($column['title']),
+                'items' => collect($column['items'])
+                    ->map(fn (array $item): array => [
+                        'label' => trim($item['label']),
+                        'href' => trim($item['href']),
+                    ])
+                    ->values()
+                    ->all(),
+            ])
+            ->values()
+            ->all();
 
         return [
             'site' => collect($data)

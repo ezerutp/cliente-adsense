@@ -26,33 +26,6 @@
     $loginHref = \Illuminate\Support\Facades\Route::has('login') ? route('login') : '#';
     $publishHref = route('advertise');
 
-    $footerGroups = [
-        'Información' => [
-            ['label' => 'Sobre nosotros', 'href' => '#'],
-            ['label' => 'Categorías', 'href' => '#categorias'],
-            ['label' => 'Publicar anuncio', 'href' => $publishHref],
-        ],
-        'Legal' => [
-            ['label' => 'Política de Privacidad', 'href' => '#'],
-            ['label' => 'Términos y Condiciones', 'href' => '#'],
-            ['label' => 'Aviso legal', 'href' => '#'],
-        ],
-        'Ayuda' => [
-            ['label' => 'Centro de ayuda', 'href' => '#'],
-            ['label' => 'Últimas publicaciones', 'href' => '#recientes'],
-            ['label' => 'Reportar anuncio', 'href' => '#'],
-        ],
-        'Contacto' => [
-            ['label' => 'Soporte', 'href' => '#'],
-            ['label' => 'Comercial', 'href' => '#'],
-            ['label' => 'Prensa', 'href' => '#'],
-        ],
-    ];
-
-    $legalLinks = [
-        ['label' => 'Política de Privacidad', 'href' => '#'],
-        ['label' => 'Términos y Condiciones', 'href' => '#'],
-    ];
 @endphp
 
 <!DOCTYPE html>
@@ -149,8 +122,8 @@
         brand-href="#inicio"
         description="Clasificados premium con una experiencia moderna, clara y confiable."
         copyright="Todos los derechos reservados."
-        :groups="$footerGroups"
-        :legal-links="$legalLinks"
+        :groups="$siteSettings->footerGroups()"
+        :legal-links="$siteSettings->footerLegalLinks()"
     />
 
     <x-age-confirmation-modal :content="$ageGate" />

@@ -20,26 +20,6 @@
     $loginHref = \Illuminate\Support\Facades\Route::has('login') ? route('login') : '#';
     $publishHref = route('advertise');
 
-    $footerGroups = [
-        'Información' => [
-            ['label' => 'Inicio', 'href' => route('categories.public.show', ['category' => $category->slug]).'#inicio'],
-            ['label' => 'Posts', 'href' => '#posts'],
-            ['label' => 'Publicar anuncio', 'href' => $publishHref],
-        ],
-        'Legal' => [
-            ['label' => 'Política de Privacidad', 'href' => '#'],
-            ['label' => 'Términos y Condiciones', 'href' => '#'],
-        ],
-        'Ayuda' => [
-            ['label' => 'Centro de ayuda', 'href' => '#'],
-            ['label' => 'Reportar anuncio', 'href' => '#'],
-        ],
-    ];
-
-    $legalLinks = [
-        ['label' => 'Política de Privacidad', 'href' => '#'],
-        ['label' => 'Términos y Condiciones', 'href' => '#'],
-    ];
 @endphp
 
 <!DOCTYPE html>
@@ -109,8 +89,8 @@
         brand-href="{{ url('/') }}"
         description="Clasificados premium con una experiencia moderna, clara y confiable."
         copyright="Todos los derechos reservados."
-        :groups="$footerGroups"
-        :legal-links="$legalLinks"
+        :groups="$siteSettings->footerGroups()"
+        :legal-links="$siteSettings->footerLegalLinks()"
     />
 
     <x-age-confirmation-modal :content="$ageGate" />

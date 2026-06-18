@@ -77,7 +77,8 @@ is_active
 
 ### `site_settings`
 
-Registro singleton con textos, colores y parámetros regionales.
+Registro singleton con textos, colores, parámetros regionales y `footer_columns`
+como JSON para las columnas y enlaces del footer público.
 
 ### `age_gate_settings`
 
@@ -139,14 +140,22 @@ Laravel crea usuarios, sesiones y tokens. Spatie crea roles, permisos y tablas p
 - Usa `updateOrCreate`, por lo que puede ejecutarse varias veces.
 - El nombre es la clave lógica.
 
+### `FooterSeeder`
+
+- Inicializa las columnas Información, Legal, Ayuda y Contacto.
+- Crea el registro singleton de configuración cuando no existe.
+- Rellena `footer_columns` cuando está vacío.
+- No sobrescribe un footer personalizado.
+
 ### `DatabaseSeeder`
 
 1. Ejecuta `LocationSeeder`.
-2. Limpia cache de permisos.
-3. Crea 25 permisos.
-4. Crea roles `admin`, `editor` y `viewer`.
-5. Sincroniza permisos por rol.
-6. Crea el administrador de desarrollo.
+2. Ejecuta `FooterSeeder`.
+3. Limpia cache de permisos.
+4. Crea 25 permisos.
+5. Crea roles `admin`, `editor` y `viewer`.
+6. Sincroniza permisos por rol.
+7. Crea el administrador de desarrollo.
 
 ## Permisos sembrados
 
@@ -169,6 +178,7 @@ php artisan migrate
 php artisan migrate:status
 php artisan db:seed
 php artisan db:seed --class=Database\\Seeders\\LocationSeeder
+php artisan db:seed --class=Database\\Seeders\\FooterSeeder
 php artisan migrate:fresh --seed
 ```
 

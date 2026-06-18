@@ -98,7 +98,7 @@ Los modelos usan atributos `#[Fillable]`, casts y relaciones Eloquent:
 
 La vista usa un panel 1/4–3/4:
 
-- Menú lateral: portada, colores, servidor, edad y ubicaciones.
+- Menú lateral: portada, colores, servidor, footer, edad y ubicaciones.
 - Contenido: una sección visible por vez.
 - El hash conserva la sección actual.
 - Los errores y la paginación abren la sección adecuada.
