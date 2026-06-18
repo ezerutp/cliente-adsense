@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AgeGateSetting;
 use App\Models\Post;
 use App\Models\SiteSetting;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -115,7 +116,20 @@ class PublicPostBrowseController extends Controller
                 ->first(fn ($tag): bool => Str::slug((string) $tag) === $slug);
 
         $siteSettings = SiteSetting::current();
-        $posts = $matchingPosts->map(fn (Post $post): array => $this->listing($post, $siteSettings));
+        $page = LengthAwarePaginator::resolveCurrentPage();
+        $posts = new LengthAwarePaginator(
+            $matchingPosts
+                ->forPage($page, Post::PUBLIC_PER_PAGE)
+                ->map(fn (Post $post): array => $this->listing($post, $siteSettings))
+                ->values(),
+            $matchingPosts->count(),
+            Post::PUBLIC_PER_PAGE,
+            $page,
+            [
+                'path' => request()->url(),
+                'query' => request()->query(),
+            ],
+        );
 
         return view('posts.browse-public', [
             'ageGate' => AgeGateSetting::current()->toModalContent(),
@@ -157,6 +171,7 @@ class PublicPostBrowseController extends Controller
         return [
             'id' => 'post-'.$post->id,
             'title' => $post->title,
+            'subtitle' => $post->subtitle,
             'city' => $post->location ?: $siteSettings->server_country,
             'category' => $category?->name ?? 'General',
             'updated' => $post->published_at ? 'Publicado '.$post->published_at->diffForHumans() : 'Publicado recientemente',

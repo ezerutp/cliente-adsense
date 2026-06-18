@@ -54,7 +54,7 @@ class PublicPostSearchController extends Controller
             ->latest('created_at');
 
         $posts = $query
-            ->paginate(12)
+            ->paginate(Post::PUBLIC_PER_PAGE)
             ->withQueryString()
             ->through(fn (Post $post): array => $this->listing($post, $siteSettings));
 
@@ -86,6 +86,7 @@ class PublicPostSearchController extends Controller
         return [
             'id' => 'post-'.$post->id,
             'title' => $post->title,
+            'subtitle' => $post->subtitle,
             'city' => $post->location ?: $siteSettings->server_country,
             'category' => $category?->name ?? 'General',
             'updated' => $post->published_at ? 'Publicado '.$post->published_at->diffForHumans() : 'Publicado recientemente',

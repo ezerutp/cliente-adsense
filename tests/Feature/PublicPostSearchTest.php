@@ -109,6 +109,37 @@ class PublicPostSearchTest extends TestCase
             ->assertDontSee('Post oculto');
     }
 
+    public function test_search_is_paginated_by_twenty_and_preserves_filters(): void
+    {
+        $category = $this->category('Paginada', 'paginada');
+
+        foreach (range(1, 21) as $number) {
+            $this->post(
+                $category,
+                "Coincide {$number}",
+                "coincide-{$number}",
+                'Lima',
+            );
+        }
+
+        $this->get(route('posts.search', [
+            'category' => 'paginada',
+            'location' => 'lima',
+            'query' => 'Coincide',
+        ]))
+            ->assertOk()
+            ->assertViewHas('posts', function ($posts): bool {
+                $this->assertSame(21, $posts->total());
+                $this->assertSame(Post::PUBLIC_PER_PAGE, $posts->perPage());
+                $this->assertSame(20, $posts->count());
+                $this->assertStringContainsString('category=paginada', $posts->nextPageUrl());
+                $this->assertStringContainsString('location=lima', $posts->nextPageUrl());
+                $this->assertStringContainsString('query=Coincide', $posts->nextPageUrl());
+
+                return true;
+            });
+    }
+
     private function category(string $name, string $slug): Category
     {
         return Category::query()->create([

@@ -41,7 +41,7 @@
             <p class="text-sm font-bold uppercase tracking-[0.18em] text-[#E91E63]">{{ $eyebrow }}</p>
             <h1 class="mt-3 text-4xl font-black tracking-tight text-[#222222] sm:text-5xl">{{ $label }}</h1>
             <p class="mt-4 text-base leading-7 text-[#6B7280]">
-                {{ trans_choice('{1} :count publicación activa|[2,*] :count publicaciones activas', $posts->count(), ['count' => $posts->count()]) }}
+                {{ trans_choice('{1} :count publicación activa|[2,*] :count publicaciones activas', $posts->total(), ['count' => $posts->total()]) }}
             </p>
         </div>
 
@@ -54,6 +54,12 @@
                 </div>
             @endforelse
         </section>
+
+        @if ($posts->hasPages())
+            <div class="mt-10">
+                {{ $posts->links() }}
+            </div>
+        @endif
     </main>
 
     <x-footer

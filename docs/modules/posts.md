@@ -101,6 +101,19 @@ Valida:
 - Pertenencia del post a la categoría.
 - Visibilidad pública.
 
+## Cards públicas
+
+- El título se muestra en una sola línea y aplica elipsis cuando supera el ancho.
+- Debajo se muestra una línea del subtítulo, también con elipsis.
+- El texto completo permanece disponible en el atributo `title`.
+- El espacio del subtítulo se conserva aunque el post no tenga uno, para
+  mantener todas las cards alineadas.
+
+## Paginación pública
+
+Los listados de categoría, búsqueda, ubicación y etiqueta muestran un máximo de
+20 posts por página. La búsqueda conserva sus filtros al navegar entre páginas.
+
 ## Persistencia de cards
 
 Posts y cards se guardan en una transacción. En edición, las cards del post se recrean para mantener orden y estado.

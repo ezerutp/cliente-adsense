@@ -31,16 +31,25 @@
             @endif
         </div>
 
-        <div class="p-5">
-            <div class="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#E91E63]">
-                <span>{{ $listing['city'] }}</span>
+        <div class="min-w-0 p-5">
+            <div class="mb-3 flex min-w-0 items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#E91E63]">
+                <span class="min-w-0 truncate">{{ $listing['city'] }}</span>
                 <span class="size-1 rounded-full bg-[#E5E7EB]"></span>
-                <span>{{ $listing['category'] }}</span>
+                <span class="min-w-0 truncate">{{ $listing['category'] }}</span>
             </div>
-            <h3 class="line-clamp-2 min-h-14 text-lg font-bold leading-7 text-[#222222] transition group-hover:text-[#E91E63]">
+            <h3
+                class="truncate text-lg font-bold leading-7 text-[#222222] transition group-hover:text-[#E91E63]"
+                title="{{ $listing['title'] }}"
+            >
                 {{ $listing['title'] }}
             </h3>
-            <p class="mt-3 text-sm text-[#6B7280]">{{ $listing['updated'] }}</p>
+            <p
+                class="mt-1 h-5 truncate text-sm leading-5 text-[#6B7280]"
+                @if (filled($listing['subtitle'] ?? null)) title="{{ $listing['subtitle'] }}" @endif
+            >
+                {{ $listing['subtitle'] ?? '' }}
+            </p>
+            <p class="mt-3 truncate text-sm text-[#6B7280]">{{ $listing['updated'] }}</p>
         </div>
     </article>
 </a>

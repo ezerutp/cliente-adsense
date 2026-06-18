@@ -59,6 +59,7 @@ Route::get('/', function () {
                 return [
                     'id' => 'post-'.$post->id,
                     'title' => $post->title,
+                    'subtitle' => $post->subtitle,
                     'city' => $siteSettings->server_country,
                     'category' => $category?->name ?? 'General',
                     'updated' => $post->published_at ? 'Publicado '.$post->published_at->diffForHumans() : 'Publicado recientemente',
@@ -312,6 +313,7 @@ Route::get('/{category:slug}/{post:slug}', function (Category $category, Post $p
 
             return [
                 'title' => $relatedPost->title,
+                'subtitle' => $relatedPost->subtitle,
                 'city' => $siteSettings->server_country,
                 'category' => $category->name,
                 'updated' => $relatedPost->published_at ? 'Publicado '.$relatedPost->published_at->diffForHumans() : 'Publicado recientemente',
@@ -337,13 +339,15 @@ Route::get('/{category:slug}', function (Category $category) {
         ->whereBelongsTo($category)
         ->publiclyVisible()
         ->latest('published_at')
-        ->get()
-        ->map(function (Post $post) use ($category, $siteSettings): array {
+        ->paginate(Post::PUBLIC_PER_PAGE)
+        ->withQueryString()
+        ->through(function (Post $post) use ($category, $siteSettings): array {
             $tags = collect($post->tags ?? [])->map(fn (string $tag): string => mb_strtolower($tag));
 
             return [
                 'id' => 'post-'.$post->id,
                 'title' => $post->title,
+                'subtitle' => $post->subtitle,
                 'city' => $siteSettings->server_country,
                 'category' => $category->name,
                 'updated' => $post->published_at ? 'Publicado '.$post->published_at->diffForHumans() : 'Publicado recientemente',

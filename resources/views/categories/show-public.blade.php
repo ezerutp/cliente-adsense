@@ -70,6 +70,12 @@
                     </div>
                 @endforelse
             </div>
+
+            @if ($posts->hasPages())
+                <div class="mt-10">
+                    {{ $posts->links() }}
+                </div>
+            @endif
         </x-content-section>
 
         <x-cta-section

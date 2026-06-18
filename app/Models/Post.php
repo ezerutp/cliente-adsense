@@ -36,6 +36,8 @@ class Post extends Model
 {
     use HasFactory;
 
+    public const PUBLIC_PER_PAGE = 20;
+
     /**
      * Get the attributes that should be cast.
      *
