@@ -2,8 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\Category;
-use App\Models\Post;
+use App\Models\Location;
 use App\Support\PublicLocationDirectory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -12,49 +11,50 @@ class PublicLocationDirectoryTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_it_returns_three_clickable_groups_using_only_public_post_locations(): void
+    public function test_it_returns_three_ordered_groups_using_the_complete_location_catalog(): void
     {
-        $activeCategory = Category::query()->create([
-            'name' => 'Activa',
-            'slug' => 'activa',
-            'is_active' => true,
-        ]);
-        $inactiveCategory = Category::query()->create([
-            'name' => 'Inactiva',
-            'slug' => 'inactiva',
-            'is_active' => false,
-        ]);
-
-        foreach (['Miraflores', 'San Isidro', 'Barranco', 'Lima'] as $index => $location) {
-            $this->createPost($activeCategory, "Visible {$index}", "visible-{$index}", $location);
+        foreach ([
+            ['Chachapoyas', 'Amazonas', 0],
+            ['Huaraz', 'Áncash', 0],
+            ['Arequipa', 'Arequipa', 0],
+            ['Cayma', 'Arequipa', 1],
+            ['Miraflores', 'Lima', 0],
+            ['San Isidro', 'Lima', 1],
+            ['Tacna', 'Tacna', 0],
+        ] as [$name, $department, $sortOrder]) {
+            Location::query()->create([
+                'name' => $name,
+                'department' => $department,
+                'sort_order' => $sortOrder,
+            ]);
         }
-
-        $this->createPost($activeCategory, 'Oculto', 'oculto', 'Comas', false);
-        $this->createPost($inactiveCategory, 'Categoría oculta', 'categoria-oculta', 'Surco');
 
         $directory = PublicLocationDirectory::make();
         $links = collect($directory['groups'])->pluck('links')->flatten(1);
 
         $this->assertCount(3, $directory['groups']);
-        $this->assertEqualsCanonicalizing(
-            ['Miraflores', 'San Isidro', 'Barranco', 'Lima'],
+        $this->assertSame(
+            ['Chachapoyas', 'Huaraz', 'Arequipa', 'Cayma', 'Tacna', 'Miraflores', 'San Isidro'],
             $links->pluck('label')->all(),
         );
+        $this->assertSame(
+            ['Ciudades y distritos del Perú', 'Lima Metropolitana', 'Callao'],
+            collect($directory['groups'])->pluck('title')->all(),
+        );
         $this->assertTrue($links->every(fn (array $link): bool => str_contains($link['href'], '/u/')));
-        $this->assertNotContains('Comas', $links->pluck('label'));
-        $this->assertNotContains('Surco', $links->pluck('label'));
     }
 
-    private function createPost(Category $category, string $title, string $slug, string $location, bool $active = true): Post
+    public function test_catalog_location_without_posts_opens_an_empty_listing(): void
     {
-        return Post::query()->create([
-            'category_id' => $category->id,
-            'title' => $title,
-            'slug' => $slug,
-            'body' => 'Contenido',
-            'location' => $location,
-            'is_active' => $active,
-            'published_at' => now()->subDay(),
+        Location::query()->create([
+            'name' => 'Chachapoyas',
+            'department' => 'Amazonas',
+            'sort_order' => 0,
         ]);
+
+        $this->get(route('posts.locations.show', ['location' => 'chachapoyas']))
+            ->assertOk()
+            ->assertSee('Chachapoyas')
+            ->assertSee('No hay posts activos en esta ubicación.');
     }
 }

@@ -10,9 +10,11 @@
             <p class="mt-4 text-base leading-7 text-[#6B7280]">{{ $directory['description'] }}</p>
         </div>
 
-        <div class="grid gap-5 lg:grid-cols-3">
-            @foreach ($directory['groups'] as $group)
-                <x-location-group :group="$group" />
+        <div class="grid items-start gap-4 lg:grid-cols-2">
+            @foreach ($directory['groups'] as $index => $group)
+                <div @class(['lg:row-span-2' => $index === 0])>
+                    <x-location-group :group="$group" :dense="$index === 0" />
+                </div>
             @endforeach
         </div>
     </div>

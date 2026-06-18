@@ -41,12 +41,12 @@ Características:
 
 Construye el bloque “Explora anuncios por zona”.
 
-1. Consulta posts públicamente visibles.
-2. Exige categoría activa.
-3. Agrupa por slug de ubicación.
-4. Ordena por cantidad de posts y luego alfabéticamente.
-5. Distribuye las ubicaciones en tres cards.
-6. Genera enlaces `/u/{slug}`.
+1. Consulta todo el catálogo `locations`.
+2. Ordena por departamento, `sort_order` y nombre.
+3. Separa Perú, Lima Metropolitana y Callao.
+4. Renderiza un directorio compacto de botones en dos columnas.
+5. Genera enlaces `/u/{slug}`.
+6. Mantiene navegables las ubicaciones sin publicaciones.
 
 ## `PublicSearchOptions`
 

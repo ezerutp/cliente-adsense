@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AgeGateSetting;
+use App\Models\Location;
 use App\Models\Post;
 use App\Models\SiteSetting;
 use Illuminate\Support\Collection;
@@ -23,11 +24,18 @@ class PublicPostBrowseController extends Controller
 
     public function location(string $location): View
     {
+        $catalogLocation = Location::query()
+            ->get(['name'])
+            ->first(fn (Location $item): bool => Str::slug($item->name) === $location);
+
+        abort_unless($catalogLocation, 404);
+
         return $this->postsView(
             type: 'location',
             slug: $location,
             eyebrow: 'Ubicación',
             emptyMessage: 'No hay posts activos en esta ubicación.',
+            fallbackLabel: $catalogLocation->name,
         );
     }
 
@@ -93,7 +101,13 @@ class PublicPostBrowseController extends Controller
         ]);
     }
 
-    private function postsView(string $type, string $slug, string $eyebrow, string $emptyMessage): View
+    private function postsView(
+        string $type,
+        string $slug,
+        string $eyebrow,
+        string $emptyMessage,
+        ?string $fallbackLabel = null,
+    ): View
     {
         $matchingPosts = $this->publicPosts()
             ->filter(function (Post $post) use ($type, $slug): bool {
@@ -107,10 +121,10 @@ class PublicPostBrowseController extends Controller
             })
             ->values();
 
-        abort_if($matchingPosts->isEmpty(), 404);
+        abort_if($matchingPosts->isEmpty() && $fallbackLabel === null, 404);
 
         $label = $type === 'location'
-            ? trim((string) $matchingPosts->first()->location)
+            ? ($matchingPosts->isNotEmpty() ? trim((string) $matchingPosts->first()->location) : $fallbackLabel)
             : collect($matchingPosts->first()->tags ?? [])
                 ->first(fn ($tag): bool => Str::slug((string) $tag) === $slug);
 

@@ -76,11 +76,16 @@ El detalle del post enlaza ubicación y tags hacia estos módulos.
 
 ## Directorio de tres cards
 
-`PublicLocationDirectory` toma ubicaciones de posts activos, agrupa y reparte en:
+`PublicLocationDirectory` toma todo el catálogo de `locations`, lo ordena por
+departamento, orden y nombre, y lo presenta como un directorio compacto:
 
-- Zonas con actividad.
-- Más ubicaciones.
-- Otros lugares.
+- Ciudades y distritos del Perú.
+- Lima Metropolitana.
+- Callao.
+
+El bloque nacional ocupa la columna principal y Lima/Callao se apilan en la
+segunda columna. Las ubicaciones sin publicaciones también son navegables y
+muestran un listado vacío.
 
 ## Visibilidad
 
