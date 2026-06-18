@@ -77,9 +77,9 @@ is_active
 
 ### `site_settings`
 
-Registro singleton con nombre de marca dividido en texto principal/destacado,
-textos de portada, colores, parámetros regionales y `footer_columns` como JSON
-para las columnas y enlaces del footer público.
+Registro singleton con nombre de marca, contacto comercial para WhatsApp y
+Telegram, textos de portada, colores, parámetros regionales y `footer_columns`
+como JSON para las columnas y enlaces del footer público.
 
 ### `age_gate_settings`
 
@@ -131,6 +131,10 @@ Laravel crea usuarios, sesiones y tokens. Spatie crea roles, permisos y tablas p
 3. Completa posts sin ubicación.
 4. Importa ubicaciones históricas de posts.
 5. Convierte `posts.location` a `NOT NULL`.
+
+También se agregan a `site_settings` los campos `contact_country`,
+`contact_phone` y `contact_telegram_username`, usados para construir los enlaces
+de contacto de la vista pública para anunciar.
 
 ## Seeders
 

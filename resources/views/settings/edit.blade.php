@@ -9,6 +9,17 @@
 
     @php
         $locationErrorFields = ['name', 'department', 'sort_order'];
+        $generalErrorFields = [
+            'brand_primary_text',
+            'brand_accent_text',
+            'contact_country',
+            'contact_phone',
+            'contact_telegram_username',
+            'site_title',
+            'site_subtitle',
+            'cover_image_url',
+            'cover_image_file',
+        ];
         $colorErrorFields = [
             'primary_color',
             'primary_hover_color',
@@ -43,7 +54,9 @@
                     ? 'server'
                     : (collect($footerErrorFields)->contains(fn ($field) => $errors->has($field))
                         ? 'footer'
-                        : (collect($ageGateErrorFields)->contains(fn ($field) => $errors->has($field)) ? 'age' : 'cover'))));
+                        : (collect($ageGateErrorFields)->contains(fn ($field) => $errors->has($field))
+                            ? 'age'
+                            : (collect($generalErrorFields)->contains(fn ($field) => $errors->has($field)) ? 'cover' : 'cover')))));
     @endphp
 
     <div
@@ -78,7 +91,7 @@
 
                     <nav class="grid gap-1 p-3 sm:grid-cols-2 lg:grid-cols-1" aria-label="Secciones de configuración">
                         @foreach ([
-                            'cover' => ['Portada', 'Título, subtítulo e imagen'],
+                            'cover' => ['Datos generales', 'Marca, contacto y portada'],
                             'colors' => ['Colores', 'Paleta pública y administrativa'],
                             'server' => ['Servidor', 'País, código y zona horaria'],
                             'footer' => ['Footer', 'Columnas y enlaces públicos'],
@@ -119,9 +132,9 @@
 
                     <section x-show="section === 'cover'" x-cloak class="space-y-6">
                         <div>
-                            <h3 class="text-base font-semibold text-gray-900">Marca y portada</h3>
+                            <h3 class="text-base font-semibold text-gray-900">Datos generales</h3>
                             <p class="mt-1 text-sm text-gray-600">
-                                El nombre se divide en dos partes para conservar el diseño bicolor del logo.
+                                Configura la marca, los canales comerciales y la portada del sitio.
                             </p>
                         </div>
 
@@ -150,6 +163,65 @@
                                     required
                                 />
                                 <x-input-error class="mt-2" :messages="$errors->get('brand_accent_text')" />
+                            </div>
+                        </div>
+
+                        <div class="rounded-lg border border-gray-200 p-4">
+                            <h4 class="text-sm font-semibold text-gray-900">Contacto para publicar anuncios</h4>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Estos datos construyen los botones de WhatsApp y Telegram de la vista “Publicar anuncio”.
+                            </p>
+
+                            <div
+                                class="mt-4 grid gap-6 sm:grid-cols-3"
+                                x-data="{
+                                    countries: @js($serverCountries),
+                                    country: @js(old('contact_country', $settings->contact_country ?: $settings->server_country)),
+                                }"
+                            >
+                                <div>
+                                    <x-input-label for="contact_country" value="País" />
+                                    <select
+                                        id="contact_country"
+                                        name="contact_country"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        x-model="country"
+                                        required
+                                    >
+                                        @foreach ($serverCountries as $country => $metadata)
+                                            <option value="{{ $country }}">
+                                                {{ $country }} (+{{ $metadata['dial_code'] }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <x-input-error class="mt-2" :messages="$errors->get('contact_country')" />
+                                </div>
+
+                                <div>
+                                    <x-input-label for="contact_phone" value="Número de teléfono" />
+                                    <x-text-input
+                                        id="contact_phone"
+                                        name="contact_phone"
+                                        type="text"
+                                        class="mt-1 block w-full"
+                                        :value="old('contact_phone', $settings->contact_phone)"
+                                        placeholder="999999999"
+                                    />
+                                    <x-input-error class="mt-2" :messages="$errors->get('contact_phone')" />
+                                </div>
+
+                                <div>
+                                    <x-input-label for="contact_telegram_username" value="Usuario de Telegram" />
+                                    <x-text-input
+                                        id="contact_telegram_username"
+                                        name="contact_telegram_username"
+                                        type="text"
+                                        class="mt-1 block w-full"
+                                        :value="old('contact_telegram_username', $settings->contact_telegram_username)"
+                                        placeholder="@usuario"
+                                    />
+                                    <x-input-error class="mt-2" :messages="$errors->get('contact_telegram_username')" />
+                                </div>
                             </div>
                         </div>
 

@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Location;
 use App\Models\Post;
 use App\Models\SiteSetting;
+use App\Support\SecureImageUploader;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -97,6 +98,9 @@ class ImageUploadTest extends TestCase
                 'settings_section' => 'cover',
                 'brand_primary_text' => $site['brand_primary_text'],
                 'brand_accent_text' => $site['brand_accent_text'],
+                'contact_country' => $site['contact_country'],
+                'contact_phone' => $site['contact_phone'],
+                'contact_telegram_username' => $site['contact_telegram_username'],
                 'site_title' => $site['site_title'],
                 'site_subtitle' => $site['site_subtitle'],
                 'cover_image_url' => 'https://example.com/banner.jpg',
@@ -182,6 +186,26 @@ class ImageUploadTest extends TestCase
         $this->assertDatabaseMissing('categories', ['name' => 'Categoría con error']);
     }
 
+    public function test_image_optimization_preserves_the_original_aspect_ratio_without_padding(): void
+    {
+        Storage::fake('public');
+
+        $url = app(SecureImageUploader::class)->upload(
+            $this->rectangularImage(),
+            'aspect-ratio-test',
+        );
+        $path = ltrim((string) parse_url($url, PHP_URL_PATH), '/');
+        $path = preg_replace('#^storage/#', '', $path);
+        $processed = tempnam(sys_get_temp_dir(), 'processed-image-');
+        file_put_contents($processed, Storage::disk('public')->get($path));
+
+        [$width, $height] = getimagesize($processed);
+
+        $this->assertSame(320, $width);
+        $this->assertSame(180, $height);
+        $this->assertSame(16 / 9, $width / $height);
+    }
+
     private function image(string $name, string $suffix = ''): UploadedFile
     {
         $path = tempnam(sys_get_temp_dir(), 'valid-image-');
@@ -192,6 +216,18 @@ class ImageUploadTest extends TestCase
         file_put_contents($path, $png.$suffix);
 
         return new UploadedFile($path, $name, 'image/png', null, true);
+    }
+
+    private function rectangularImage(): UploadedFile
+    {
+        $path = tempnam(sys_get_temp_dir(), 'rectangular-image-');
+        $png = base64_decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAUAAAAC0EAIAAAA6Fr4FAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAGYktHRP///////wlY99wAAAAHdElNRQfqBhISLzgr5w8dAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDI2LTA2LTE4VDE4OjQ3OjU2KzAwOjAwqT0C0wAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyNi0wNi0xOFQxODo0Nzo1NiswMDowMNhgum8AAAAodEVYdGRhdGU6dGltZXN0YW1wADIwMjYtMDYtMThUMTg6NDc6NTYrMDA6MDCPdZuwAAAEKUlEQVR42u3dsbHcMBBEQV7V8sJQcspMyoywlAQhAznMGL87AnosPGCBz79/v379/n0BAEGzn+t7/W1/BgD8LLPXde8/7c8AgJ/FChgACmY/13f7AQNA1FkBS9AAEDV7XbcEDQBZEjQAFMwrQQNA3OzlFDQApM1+rluCBoAsp6ABoMBFHABQMHs5BQ0AabOf65agASDLHDAAFBhDAoACF3EAQIE5YAAoMIYEAAX2gAGg4JyCtgcMAFFnDtgKGACiJGgAKJCgAaDAKWgAKJjXHDAAxJ09YAkaAKIkaAAo8BoSABTMXt4DBoA0CRoACiRoACg4K2AJGgCi5l3mgAEgzR4wABRI0ABQMFuCBoA4CRoACiRoACiY/XzMAQNA2LmK0g8YAKIkaAAomNdVlAAQN3s5BQ0AabOf694SNABEmQMGgAI/YAAomL2urwQNAFmzH3PAAJAmQQNAwbwSNADEWQEDQIE9YAAomO0qSgCIO1dR2gMGgCgrYAAosAcMAAUSNAAUSNAAUDCvOWAAiDt7wBI0AESd15CsgAEgylWUAFBwfsASNABEzV7XLUEDQJYEDQAFZw5YggaAKCtgACiYd7kLGgDSJGgAKJCgAaBgtgQNAHESNAAUSNAAUOAHDAAF5ypKCRoAoua1AgaAuHMIyw8YAKJmL88RAkDa7MccMACkSdAAUHDGkCRoAIg6e8BWwAAQNfv53BI0AGRJ0ABQMK8EDQBxTkEDQMGZA5agASDKChgACowhAUCB94ABoGD24z1gAEizAgaAAnvAAFAw73N9JWgAyPIeMAAUSNAAUHAu4pCgASDKKWgAKDhzwH7AABB19oAlaACIkqABoODMAfsBA0DU7OU9YABIk6ABoODMAfsBA0DUWQFL0AAQdfaArYABIEqCBoACCRoACmYvV1ECQNq8xpAAIE6CBoACh7AAoMAYEgAUSNAAUCBBA0DB7OUUNACkzX48RwgAafNK0AAQ5z1gACiYva7vlqABIOrsAVsBA0CUBA0ABRI0ABRYAQNAgT1gAChwFSUAFMy7Ph5jAIAwK2AAKLAHDAAF5zUkCRoAoiRoACgwBwwABd4DBoCCcxWlFTAAREnQAFAw7+MUNACkzV7XLUEDQJYEDQAFZw5YggaAKCtgACiYvdwFDQBpEjQAFEjQAFAwrwQNAHESNAAUSNAAUOAHDAAF5ypKCRoAoqyAAaDgHMLyAwaAqNnLc4QAkDb7MQcMAGnzStAAEHcOYUnQABB19oCtgAEgavZz3RI0AGRJ0ABQIEEDQIGLOACgwBwwABScOWB7wAAQZQ8YAAq8hgQABWcOWIIGgCgJGgAKJGgAKDhzwBI0AESZAwaAAnvAAFDgIg4AKJj9fKyAASBs9vIeMACkeQ8YAArMAQNAgfeAAaBg9rpuCRoAsiRoACj4D/41DLh2UA9/AAAAAElFTkSuQmCC',
+            true,
+        );
+        file_put_contents($path, $png);
+
+        return new UploadedFile($path, 'rectangular.png', 'image/png', null, true);
     }
 
     private function admin(): User

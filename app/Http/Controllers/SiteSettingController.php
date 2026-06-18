@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Throwable;
@@ -86,6 +87,9 @@ class SiteSettingController extends Controller
         $data = $request->validate([
             'brand_primary_text' => ['required', 'string', 'max:80'],
             'brand_accent_text' => ['required', 'string', 'max:80'],
+            'contact_country' => ['required', 'string', Rule::in(array_keys(SiteSetting::SERVER_COUNTRIES))],
+            'contact_phone' => ['nullable', 'string', 'max:32', 'regex:/^[0-9\s()+.-]+$/'],
+            'contact_telegram_username' => ['nullable', 'string', 'max:64', 'regex:/^@?[A-Za-z0-9_]+$/'],
             'site_title' => ['required', 'string', 'max:255'],
             'site_subtitle' => ['required', 'string', 'max:500'],
             'cover_image_url' => ['nullable', 'url:http,https', 'max:2048'],
@@ -168,6 +172,13 @@ class SiteSettingController extends Controller
             ])
             ->values()
             ->all();
+
+        $data['contact_phone'] = filled($data['contact_phone'] ?? null)
+            ? preg_replace('/\D+/', '', (string) $data['contact_phone'])
+            : null;
+        $data['contact_telegram_username'] = filled($data['contact_telegram_username'] ?? null)
+            ? ltrim(trim((string) $data['contact_telegram_username']), '@')
+            : null;
 
         return [
             'site' => collect($data)

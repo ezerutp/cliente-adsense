@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Schema;
 #[Fillable([
     'brand_primary_text',
     'brand_accent_text',
+    'contact_country',
+    'contact_phone',
+    'contact_telegram_username',
     'site_title',
     'site_subtitle',
     'cover_image_url',
@@ -67,6 +70,9 @@ class SiteSetting extends Model
     public const DEFAULTS = [
         'brand_primary_text' => 'Conejitas',
         'brand_accent_text' => 'Hot',
+        'contact_country' => 'Perú',
+        'contact_phone' => null,
+        'contact_telegram_username' => null,
         'site_title' => 'Encuentra perfiles destacados cerca de ti',
         'site_subtitle' => 'Explora anuncios verificados con filtros rápidos, experiencia limpia y una navegación diseñada para inspirar confianza.',
         'cover_image_url' => 'https://www.skokka.com.pe/static/assets/ES_HERO_DESKTOP_2400x1220_1.9b9e620ff0b74030d571.jpg',
@@ -121,7 +127,14 @@ class SiteSetting extends Model
 
         $defaults = self::DEFAULTS;
 
-        foreach (['brand_primary_text', 'brand_accent_text', 'footer_columns'] as $column) {
+        foreach ([
+            'brand_primary_text',
+            'brand_accent_text',
+            'contact_country',
+            'contact_phone',
+            'contact_telegram_username',
+            'footer_columns',
+        ] as $column) {
             if (! Schema::hasColumn('site_settings', $column)) {
                 unset($defaults[$column]);
             }
@@ -148,6 +161,29 @@ class SiteSetting extends Model
             mb_substr($this->brand_primary_text, 0, 1)
             .mb_substr($this->brand_accent_text, 0, 1),
         );
+    }
+
+    public function contactDialCode(): string
+    {
+        return self::SERVER_COUNTRIES[$this->contact_country]['dial_code'] ?? '51';
+    }
+
+    public function whatsappContactUrl(?string $baseUrl = null): ?string
+    {
+        $phone = preg_replace('/\D+/', '', $this->contactDialCode().$this->contact_phone);
+
+        return filled($this->contact_phone) && filled($phone)
+            ? rtrim($baseUrl ?: 'https://wa.me', '/').'/'.$phone
+            : null;
+    }
+
+    public function telegramContactUrl(?string $baseUrl = null): ?string
+    {
+        $username = ltrim(trim((string) $this->contact_telegram_username), '@');
+
+        return $username !== ''
+            ? rtrim($baseUrl ?: 'https://t.me', '/').'/'.$username
+            : null;
     }
 
     /**

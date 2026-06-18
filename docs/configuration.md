@@ -54,10 +54,13 @@ Ruta: `/dashboard/settings`
 
 La pantalla se divide en:
 
-### Portada
+### Datos generales
 
 - Texto principal del logo.
 - Texto destacado del logo.
+- País de contacto comercial.
+- Número de WhatsApp comercial.
+- Usuario de Telegram comercial.
 - Título del sitio.
 - Subtítulo.
 - URL de imagen de portada.
@@ -67,6 +70,11 @@ El nombre de marca se guarda en dos partes para respetar el diseño bicolor del
 header. El texto principal usa `--site-text` y el destacado usa
 `--site-primary`; el footer concatena ambas partes y genera sus iniciales
 automáticamente.
+
+Cuando las integraciones de WhatsApp o Telegram están activas, la vista
+`/publicar-anuncio` combina su URL base con estos datos generales. El prefijo de
+WhatsApp se obtiene del país seleccionado. Un canal sin dato de contacto no se
+muestra.
 
 ### Colores
 
@@ -179,7 +187,9 @@ El flujo de carga:
 2. Rechaza SVG y formatos no permitidos.
 3. Decodifica y vuelve a codificar el contenido como WebP.
 4. Elimina metadatos y cualquier contenido adicional incrustado.
-5. Genera el nombre mediante UUID y almacena en el disco público.
+5. Conserva la proporción original y solo reduce si supera los límites máximos;
+   no crea lienzos cuadrados, relleno ni padding.
+6. Genera el nombre mediante UUID y almacena en el disco público.
 
 El procesador usa Imagick o GD cuando están disponibles, con ImageMagick como
 fallback. Los límites se configuran mediante variables `IMAGE_UPLOAD_*`.

@@ -67,6 +67,7 @@ php artisan test --filter=test_all_filter_combinations
 ### Carga de imágenes
 
 - Re-codificación a WebP.
+- Conservación de la proporción original sin padding ni lienzo cuadrado.
 - Rechazo de scripts renombrados como imagen.
 - Diagnóstico de `UPLOAD_ERR_INI_SIZE` mediante modal.
 - Prioridad del archivo sobre la URL.

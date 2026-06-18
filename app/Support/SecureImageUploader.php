@@ -195,9 +195,17 @@ class SecureImageUploader
         $image = new \Imagick($source.'[0]');
         $image->autoOrient();
         $image->stripImage();
+        [$targetWidth, $targetHeight] = $this->targetDimensions(
+            $image->getImageWidth(),
+            $image->getImageHeight(),
+        );
+
+        if ($targetWidth !== $image->getImageWidth() || $targetHeight !== $image->getImageHeight()) {
+            $image->resizeImage($targetWidth, $targetHeight, \Imagick::FILTER_LANCZOS, 1);
+        }
+
         $image->setImageFormat('webp');
         $image->setImageCompressionQuality($this->quality());
-        $image->thumbnailImage($this->outputMaxWidth(), $this->outputMaxHeight(), true, true);
 
         if (! $image->writeImage($destination)) {
             throw new RuntimeException('No se pudo procesar la imagen.');
@@ -218,9 +226,7 @@ class SecureImageUploader
 
         $width = imagesx($image);
         $height = imagesy($image);
-        $scale = min(1, $this->outputMaxWidth() / $width, $this->outputMaxHeight() / $height);
-        $targetWidth = max(1, (int) floor($width * $scale));
-        $targetHeight = max(1, (int) floor($height * $scale));
+        [$targetWidth, $targetHeight] = $this->targetDimensions($width, $height);
         $target = imagecreatetruecolor($targetWidth, $targetHeight);
 
         imagealphablending($target, false);
@@ -253,7 +259,7 @@ class SecureImageUploader
             $source.'[0]',
             '-auto-orient',
             '-strip',
-            '-resize', $this->outputMaxWidth().'x'.$this->outputMaxHeight().'>',
+            '-thumbnail', $this->outputMaxWidth().'x'.$this->outputMaxHeight().'>',
             '-quality', (string) $this->quality(),
             'webp:'.$destination,
         ]);
@@ -298,6 +304,23 @@ class SecureImageUploader
     private function outputMaxHeight(): int
     {
         return max(1, (int) config('image_uploads.output_max_height', 2400));
+    }
+
+    /**
+     * @return array{0: int, 1: int}
+     */
+    private function targetDimensions(int $width, int $height): array
+    {
+        $scale = min(
+            1,
+            $this->outputMaxWidth() / max(1, $width),
+            $this->outputMaxHeight() / max(1, $height),
+        );
+
+        return [
+            max(1, (int) round($width * $scale)),
+            max(1, (int) round($height * $scale)),
+        ];
     }
 
     private function iniKilobytes(string $value): int

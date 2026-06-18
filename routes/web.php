@@ -236,10 +236,10 @@ Route::get('/publicar-anuncio', function () {
             ->whereIn('provider', ['whatsapp', 'telegram'])
             ->orderByRaw("CASE provider WHEN 'whatsapp' THEN 1 WHEN 'telegram' THEN 2 ELSE 3 END")
             ->get()
-            ->map(function (Integration $integration): array {
-                $href = $integration->base_url ?: match ($integration->provider) {
-                    'whatsapp' => 'https://wa.me',
-                    'telegram' => 'https://t.me',
+            ->map(function (Integration $integration) use ($siteSettings): array {
+                $href = match ($integration->provider) {
+                    'whatsapp' => $siteSettings->whatsappContactUrl($integration->base_url),
+                    'telegram' => $siteSettings->telegramContactUrl($integration->base_url),
                     default => null,
                 };
 
