@@ -17,8 +17,10 @@
     </div>
 
     <div class="mt-5 flex flex-wrap gap-2">
-        @foreach ($group['links'] as $link)
+        @forelse ($group['links'] as $link)
             <x-location-link :link="$link" />
-        @endforeach
+        @empty
+            <p class="text-sm text-[#9CA3AF]">Aún no hay ubicaciones disponibles.</p>
+        @endforelse
     </div>
 </article>

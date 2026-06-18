@@ -14,6 +14,11 @@
                     {{ session('status') }}
                 </div>
             @endif
+            @if (session('error'))
+                <div class="mb-6 rounded-md bg-red-50 p-4 text-sm font-medium text-red-800">
+                    {{ session('error') }}
+                </div>
+            @endif
 
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <form method="POST" action="{{ route('settings.update') }}" class="space-y-8 p-6">
@@ -310,6 +315,145 @@
                     </div>
                 </form>
             </div>
+
+            <section id="locations" class="mt-8 scroll-mt-24 overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                <div class="border-b border-gray-200 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Ubicaciones distritales</h3>
+                    <p class="mt-2 text-sm text-gray-600">
+                        Estas ubicaciones estarán disponibles en el selector obligatorio del formulario de posts.
+                    </p>
+
+                    <form method="POST" action="{{ route('settings.locations.store') }}" class="mt-6 grid gap-4 sm:grid-cols-[1fr_1fr_120px_auto] sm:items-end">
+                        @csrf
+                        <input type="hidden" name="locations_page" value="{{ $locations->currentPage() }}">
+
+                        <div>
+                            <x-input-label for="location_name" value="Distrito o ubicación" />
+                            <x-text-input
+                                id="location_name"
+                                name="name"
+                                type="text"
+                                class="mt-1 block w-full"
+                                :value="old('name')"
+                                required
+                            />
+                            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+                        </div>
+
+                        <div>
+                            <x-input-label for="location_department" value="Departamento" />
+                            <x-text-input
+                                id="location_department"
+                                name="department"
+                                type="text"
+                                class="mt-1 block w-full"
+                                :value="old('department', 'Lima')"
+                                required
+                            />
+                            <x-input-error class="mt-2" :messages="$errors->get('department')" />
+                        </div>
+
+                        <div>
+                            <x-input-label for="location_sort_order" value="Orden" />
+                            <x-text-input
+                                id="location_sort_order"
+                                name="sort_order"
+                                type="number"
+                                min="0"
+                                class="mt-1 block w-full"
+                                :value="old('sort_order', 0)"
+                            />
+                            <x-input-error class="mt-2" :messages="$errors->get('sort_order')" />
+                        </div>
+
+                        <x-primary-button class="h-10">
+                            Agregar
+                        </x-primary-button>
+                    </form>
+                </div>
+
+                <div class="divide-y divide-gray-200">
+                    @forelse ($locations as $location)
+                        <div class="p-6">
+                            <div class="grid gap-3 lg:grid-cols-[1fr_1fr_120px_auto] lg:items-end">
+                                <form
+                                    id="location-update-{{ $location->id }}"
+                                    method="POST"
+                                    action="{{ route('settings.locations.update', $location) }}"
+                                    class="contents"
+                                >
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="locations_page" value="{{ $locations->currentPage() }}">
+
+                                    <div>
+                                        <x-input-label for="location-name-{{ $location->id }}" value="Ubicación" />
+                                        <x-text-input
+                                            id="location-name-{{ $location->id }}"
+                                            name="name"
+                                            type="text"
+                                            class="mt-1 block w-full"
+                                            :value="$location->name"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <x-input-label for="location-department-{{ $location->id }}" value="Departamento" />
+                                        <x-text-input
+                                            id="location-department-{{ $location->id }}"
+                                            name="department"
+                                            type="text"
+                                            class="mt-1 block w-full"
+                                            :value="$location->department"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <x-input-label for="location-order-{{ $location->id }}" value="Orden" />
+                                        <x-text-input
+                                            id="location-order-{{ $location->id }}"
+                                            name="sort_order"
+                                            type="number"
+                                            min="0"
+                                            class="mt-1 block w-full"
+                                            :value="$location->sort_order"
+                                        />
+                                    </div>
+                                </form>
+
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="submit" form="location-update-{{ $location->id }}" class="admin-button-primary">
+                                        Guardar
+                                    </button>
+
+                                    <form
+                                        method="POST"
+                                        action="{{ route('settings.locations.destroy', $location) }}"
+                                        onsubmit="return confirm('¿Eliminar esta ubicación?')"
+                                    >
+                                        @csrf
+                                        @method('DELETE')
+                                        <input type="hidden" name="locations_page" value="{{ $locations->currentPage() }}">
+                                        <button type="submit" class="admin-button-danger-outline h-10">
+                                            Eliminar
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="p-6 text-sm text-gray-500">Todavía no hay ubicaciones configuradas.</p>
+                    @endforelse
+                </div>
+
+                @if ($locations->hasPages())
+                    <div class="border-t border-gray-200 px-6 py-4">
+                        {{ $locations->links() }}
+                    </div>
+                @endif
+            </section>
         </div>
     </div>
 </x-app-layout>

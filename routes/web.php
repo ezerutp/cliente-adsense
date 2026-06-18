@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\IntegrationController;
+use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PostCardController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicPostBrowseController;
+use App\Http\Controllers\PublicPostSearchController;
 use App\Http\Controllers\SiteSettingController;
 use App\Models\AgeGateSetting;
 use App\Models\Category;
@@ -137,6 +139,12 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         ->name('settings.edit');
     Route::put('dashboard/settings', [SiteSettingController::class, 'update'])
         ->name('settings.update');
+    Route::post('dashboard/settings/locations', [LocationController::class, 'store'])
+        ->name('settings.locations.store');
+    Route::put('dashboard/settings/locations/{location}', [LocationController::class, 'update'])
+        ->name('settings.locations.update');
+    Route::delete('dashboard/settings/locations/{location}', [LocationController::class, 'destroy'])
+        ->name('settings.locations.destroy');
 });
 
 Route::middleware('auth')->group(function () {
@@ -146,6 +154,9 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+Route::get('/buscar', PublicPostSearchController::class)
+    ->name('posts.search');
 
 Route::get('/u', [PublicPostBrowseController::class, 'locations'])
     ->name('posts.locations.index');

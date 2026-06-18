@@ -13,37 +13,7 @@
         'submitLabel' => 'Buscar',
     ];
 
-    $locationDirectory = [
-        'eyebrow' => 'Directorio',
-        'title' => 'Explora anuncios por zona',
-        'description' => 'Accesos rápidos para encontrar publicaciones recientes por ciudad o distrito.',
-        'groups' => [
-            [
-                'title' => 'Lima Metropolitana',
-                'description' => 'Distritos con mayor actividad',
-                'links' => [
-                    ['label' => 'Miraflores', 'href' => '#'],
-                    ['label' => 'San Isidro', 'href' => '#'],
-                    ['label' => 'Barranco', 'href' => '#'],
-                    ['label' => 'Surco', 'href' => '#'],
-                    ['label' => 'La Molina', 'href' => '#'],
-                    ['label' => 'Lince', 'href' => '#'],
-                ],
-            ],
-            [
-                'title' => 'Perú',
-                'description' => 'Ciudades principales',
-                'links' => [
-                    ['label' => 'Arequipa', 'href' => '#'],
-                    ['label' => 'Trujillo', 'href' => '#'],
-                    ['label' => 'Chiclayo', 'href' => '#'],
-                    ['label' => 'Cusco', 'href' => '#'],
-                    ['label' => 'Piura', 'href' => '#'],
-                    ['label' => 'Ica', 'href' => '#'],
-                ],
-            ],
-        ],
-    ];
+    $locationDirectory = \App\Support\PublicLocationDirectory::make();
 
     $ageGate = $ageGate ?? \App\Models\AgeGateSetting::current()->toModalContent();
 

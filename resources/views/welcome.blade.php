@@ -3,7 +3,7 @@
 
     $search = [
         'formLabel' => 'Buscar anuncios',
-        'action' => '#',
+        'action' => route('posts.search'),
         'cityLabel' => 'Ciudad',
         'categoryLabel' => 'Categoría',
         'queryLabel' => 'Texto libre',
@@ -15,75 +15,11 @@
 
     $siteSettings = $siteSettings ?? \App\Models\SiteSetting::current();
     $categories = collect($categories ?? []);
-    $categoryNames = $categories->pluck('name')->all();
+    $searchOptions = \App\Support\PublicSearchOptions::all();
     $latestPublications = collect($latestPublications ?? []);
     $premiumListings = collect($premiumListings ?? []);
 
-    $locationDirectory = [
-        'eyebrow' => 'Directorio',
-        'title' => 'Explora anuncios por zona',
-        'description' => 'Accesos rápidos para encontrar publicaciones recientes por ciudad o distrito, sin perder la estética limpia del marketplace.',
-        'groups' => [
-            [
-                'title' => 'Lima Metropolitana',
-                'description' => 'Distritos con mayor actividad',
-                'links' => [
-                    ['label' => 'Miraflores', 'href' => '#'],
-                    ['label' => 'San Isidro', 'href' => '#'],
-                    ['label' => 'Barranco', 'href' => '#'],
-                    ['label' => 'Surco', 'href' => '#'],
-                    ['label' => 'La Molina', 'href' => '#'],
-                    ['label' => 'Lince', 'href' => '#'],
-                    ['label' => 'Los Olivos', 'href' => '#'],
-                    ['label' => 'San Miguel', 'href' => '#'],
-                    ['label' => 'Magdalena', 'href' => '#'],
-                    ['label' => 'Callao', 'href' => '#'],
-                    ['label' => 'Ate', 'href' => '#'],
-                    ['label' => 'Chorrillos', 'href' => '#'],
-                ],
-            ],
-            [
-                'title' => 'Lima Provincias',
-                'description' => 'Búsquedas fuera de la capital',
-                'links' => [
-                    ['label' => 'Ancón', 'href' => '#'],
-                    ['label' => 'Asia', 'href' => '#'],
-                    ['label' => 'Barranca', 'href' => '#'],
-                    ['label' => 'Cañete', 'href' => '#'],
-                    ['label' => 'Chancay', 'href' => '#'],
-                    ['label' => 'Chosica', 'href' => '#'],
-                    ['label' => 'Huacho', 'href' => '#'],
-                    ['label' => 'Huaral', 'href' => '#'],
-                    ['label' => 'Mala', 'href' => '#'],
-                    ['label' => 'Pativilca', 'href' => '#'],
-                    ['label' => 'San Mateo', 'href' => '#'],
-                    ['label' => 'Végueta', 'href' => '#'],
-                ],
-            ],
-            [
-                'title' => 'Perú',
-                'description' => 'Ciudades principales',
-                'links' => [
-                    ['label' => 'Arequipa', 'href' => '#'],
-                    ['label' => 'Trujillo', 'href' => '#'],
-                    ['label' => 'Chiclayo', 'href' => '#'],
-                    ['label' => 'Cusco', 'href' => '#'],
-                    ['label' => 'Piura', 'href' => '#'],
-                    ['label' => 'Ica', 'href' => '#'],
-                    ['label' => 'Tacna', 'href' => '#'],
-                    ['label' => 'Huancayo', 'href' => '#'],
-                    ['label' => 'Iquitos', 'href' => '#'],
-                    ['label' => 'Pucallpa', 'href' => '#'],
-                    ['label' => 'Tarapoto', 'href' => '#'],
-                    ['label' => 'Tumbes', 'href' => '#'],
-                    ['label' => 'Puno', 'href' => '#'],
-                    ['label' => 'Huaraz', 'href' => '#'],
-                    ['label' => 'Moquegua', 'href' => '#'],
-                    ['label' => 'Ayacucho', 'href' => '#'],
-                ],
-            ],
-        ],
-    ];
+    $locationDirectory = \App\Support\PublicLocationDirectory::make();
 
     $ageGate = $ageGate ?? \App\Models\AgeGateSetting::current()->toModalContent();
 
@@ -152,8 +88,8 @@
             :subtitle="$siteSettings->site_subtitle"
             
             :image="$siteSettings->cover_image_url ?: \App\Models\SiteSetting::DEFAULTS['cover_image_url']"
-            :cities="['Lima', 'Miraflores', 'San Isidro', 'Barranco']"
-            :categories="$categoryNames"
+            :cities="$searchOptions['locations']"
+            :categories="$searchOptions['categories']"
             :search="$search"
         />
 

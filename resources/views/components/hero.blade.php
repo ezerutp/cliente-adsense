@@ -6,6 +6,7 @@
     'cities' => [],
     'categories' => [],
     'search',
+    'selectedSearch' => [],
 ])
 
 <section class="relative isolate min-h-[70vh] overflow-hidden">
@@ -20,7 +21,7 @@
         </div>
 
         <div class="mt-10">
-            <x-search-bar :cities="$cities" :categories="$categories" :labels="$search" />
+            <x-search-bar :cities="$cities" :categories="$categories" :labels="$search" :selected="$selectedSearch" />
         </div>
     </div>
 </section>

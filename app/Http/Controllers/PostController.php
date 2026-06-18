@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Integration;
+use App\Models\Location;
 use App\Models\Post;
 use App\Models\PostCard;
 use App\Models\SiteSetting;
@@ -33,6 +34,7 @@ class PostController extends Controller
         return view('posts.create', [
             'categories' => $this->categoriesForSelect(),
             'integrations' => $this->activeIntegrations(),
+            'locations' => $this->locationsForSelect(),
             'postCardColorSuggestions' => $this->postCardColorSuggestions(),
             'cardTemplates' => $this->cardTemplates(),
         ]);
@@ -61,6 +63,7 @@ class PostController extends Controller
         return view('posts.edit', [
             'categories' => $this->categoriesForSelect(),
             'integrations' => $this->activeIntegrations(),
+            'locations' => $this->locationsForSelect(),
             'post' => $post,
             'postCardColorSuggestions' => $this->postCardColorSuggestions(),
             'cardTemplates' => $this->cardTemplates(),
@@ -131,7 +134,7 @@ class PostController extends Controller
      *     title: string,
      *     slug?: string|null,
      *     subtitle?: string|null,
-     *     location?: string|null,
+     *     location: string,
      *     body: string,
      *     cover_image_url?: string|null,
      *     gallery_image_urls: array<int, string>,
@@ -147,7 +150,7 @@ class PostController extends Controller
             'category_id' => ['required', 'integer', Rule::exists('categories', 'id')],
             'title' => ['required', 'string', 'max:255'],
             'subtitle' => ['nullable', 'string', 'max:255'],
-            'location' => ['nullable', 'string', 'max:255'],
+            'location' => ['required', 'string', 'max:255', Rule::exists('locations', 'name')],
             'body' => ['required', 'string'],
             'cover_image_url' => ['nullable', 'url', 'max:2048'],
             'gallery_image_urls' => ['nullable', 'string'],
@@ -164,9 +167,7 @@ class PostController extends Controller
 
         $this->validatePublicationWindow($data);
 
-        $data['location'] = filled($data['location'] ?? null)
-            ? trim((string) $data['location'])
-            : null;
+        $data['location'] = trim($data['location']);
         $data['gallery_image_urls'] = $this->linesToArray($data['gallery_image_urls'] ?? null);
         $data['tags'] = $this->tagsToArray($data['tags'] ?? null);
         $data = array_merge($data, $this->buildContactUrls($data));
@@ -325,6 +326,15 @@ class PostController extends Controller
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get(['id', 'name']);
+    }
+
+    private function locationsForSelect()
+    {
+        return Location::query()
+            ->orderBy('department')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get(['name', 'department']);
     }
 
     private function activeIntegrations()

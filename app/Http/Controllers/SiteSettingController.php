@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AgeGateSetting;
+use App\Models\Location;
 use App\Models\SiteSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,13 @@ class SiteSettingController extends Controller
     {
         return view('settings.edit', [
             'ageGateSettings' => AgeGateSetting::current(),
+            'locations' => Location::query()
+                ->orderBy('department')
+                ->orderBy('sort_order')
+                ->orderBy('name')
+                ->paginate(15, ['*'], 'locations_page')
+                ->withQueryString()
+                ->fragment('locations'),
             'serverCountries' => SiteSetting::SERVER_COUNTRIES,
             'settings' => SiteSetting::current(),
         ]);

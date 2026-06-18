@@ -3,6 +3,7 @@
     $method = $method ?? 'POST';
     $submitLabel = $submitLabel ?? 'Guardar post';
     $integrations = collect($integrations ?? []);
+    $locations = collect($locations ?? []);
     $cardTemplates = collect($cardTemplates ?? []);
     $galleryValue = old('gallery_image_urls', $post ? implode("\n", $post->gallery_image_urls ?? []) : '');
     $tagsValue = old('tags', $post ? implode(', ', $post->tags ?? []) : '');
@@ -199,15 +200,29 @@
 
     <div>
         <x-input-label for="location" value="Ubicación" />
-        <x-text-input
+        <select
             id="location"
             name="location"
-            type="text"
-            class="mt-1 block w-full"
-            :value="old('location', $post?->location)"
-            placeholder="Lima, Miraflores, San Isidro..."
-        />
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            required
+        >
+            <option value="">Selecciona una ubicación</option>
+            @foreach ($locations->groupBy('department') as $department => $departmentLocations)
+                <optgroup label="{{ $department }}">
+                    @foreach ($departmentLocations as $location)
+                        <option value="{{ $location->name }}" @selected(old('location', $post?->location) === $location->name)>
+                            {{ $location->name }}
+                        </option>
+                    @endforeach
+                </optgroup>
+            @endforeach
+        </select>
         <x-input-error class="mt-2" :messages="$errors->get('location')" />
+        @if ($locations->isEmpty())
+            <p class="mt-2 text-sm text-red-600">
+                Primero agrega una ubicación desde Configuración.
+            </p>
+        @endif
     </div>
 
     <div>

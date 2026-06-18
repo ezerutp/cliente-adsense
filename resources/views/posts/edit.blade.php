@@ -18,6 +18,7 @@
                         'action' => route('posts.update', $post),
                         'categories' => $categories,
                         'integrations' => $integrations,
+                        'locations' => $locations,
                         'method' => 'PUT',
                         'post' => $post,
                         'submitLabel' => 'Actualizar post',

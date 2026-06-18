@@ -18,6 +18,7 @@
                         'action' => route('posts.store'),
                         'categories' => $categories,
                         'integrations' => $integrations,
+                        'locations' => $locations,
                         'submitLabel' => 'Crear post',
                     ])
                 </div>
