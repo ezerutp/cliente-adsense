@@ -1,7 +1,7 @@
 @php
     $navLinks = \App\Support\PublicNavigation::links(url('/'));
     $loginHref = \Illuminate\Support\Facades\Route::has('login') ? route('login') : '#';
-    $publishHref = \Illuminate\Support\Facades\Route::has('register') ? route('register') : '#';
+    $publishHref = route('advertise');
     $otherDirectoryHref = route($type === 'location' ? 'posts.tags.index' : 'posts.locations.index');
     $otherDirectoryLabel = $type === 'location' ? 'Explorar etiquetas' : 'Explorar ubicaciones';
 @endphp

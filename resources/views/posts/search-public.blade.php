@@ -1,7 +1,7 @@
 @php
     $navLinks = \App\Support\PublicNavigation::links(url('/'));
     $loginHref = \Illuminate\Support\Facades\Route::has('login') ? route('login') : '#';
-    $publishHref = \Illuminate\Support\Facades\Route::has('register') ? route('register') : '#';
+    $publishHref = route('advertise');
     $search = [
         'formLabel' => 'Buscar anuncios',
         'action' => route('posts.search'),

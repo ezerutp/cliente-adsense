@@ -6,6 +6,7 @@
 | --- | --- | --- | --- |
 | GET | `/` | — | Inicio |
 | GET | `/buscar` | `posts.search` | Búsqueda combinada |
+| GET | `/publicar-anuncio` | `advertise` | Información y contacto para publicar |
 | GET | `/u` | `posts.locations.index` | Directorio de ubicaciones |
 | GET | `/u/{location}` | `posts.locations.show` | Posts por ubicación |
 | GET | `/t` | `posts.tags.index` | Directorio de etiquetas |

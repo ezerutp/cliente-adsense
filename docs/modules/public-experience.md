@@ -15,6 +15,20 @@ Incluye:
 - Directorio dinámico de ubicaciones.
 - Modal de mayoría de edad.
 
+## Publicar anuncio
+
+Ruta: `/publicar-anuncio`
+
+Explica:
+
+- Tipos de anuncio estándar y destacado.
+- Beneficios de la publicación.
+- Ejemplo visual de una ficha.
+- Proceso básico de publicación.
+- Contacto mediante integraciones activas de WhatsApp y Telegram.
+
+Todos los botones públicos “Publicar anuncio” enlazan a esta vista.
+
 ## Cards de listado
 
 `listing-card` es un enlace completo, no depende de un botón “Ver post”.

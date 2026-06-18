@@ -158,6 +158,39 @@ require __DIR__.'/auth.php';
 Route::get('/buscar', PublicPostSearchController::class)
     ->name('posts.search');
 
+Route::get('/publicar-anuncio', function () {
+    $ageGate = AgeGateSetting::current()->toModalContent();
+    $siteSettings = SiteSetting::current();
+    $contactButtons = collect();
+
+    if (Schema::hasTable('integrations')) {
+        $contactButtons = Integration::query()
+            ->where('is_active', true)
+            ->whereIn('provider', ['whatsapp', 'telegram'])
+            ->orderByRaw("CASE provider WHEN 'whatsapp' THEN 1 WHEN 'telegram' THEN 2 ELSE 3 END")
+            ->get()
+            ->map(function (Integration $integration): array {
+                $href = $integration->base_url ?: match ($integration->provider) {
+                    'whatsapp' => 'https://wa.me',
+                    'telegram' => 'https://t.me',
+                    default => null,
+                };
+
+                return [
+                    'provider' => $integration->provider,
+                    'label' => $integration->name,
+                    'href' => $href,
+                    'icon' => $integration->icon ?: Integration::DEFAULT_ICONS[$integration->provider],
+                    'button_color' => $integration->button_color ?: '#222222',
+                ];
+            })
+            ->filter(fn (array $contact): bool => filled($contact['href']))
+            ->values();
+    }
+
+    return view('advertise', compact('ageGate', 'contactButtons', 'siteSettings'));
+})->name('advertise');
+
 Route::get('/u', [PublicPostBrowseController::class, 'locations'])
     ->name('posts.locations.index');
 Route::get('/u/{location}', [PublicPostBrowseController::class, 'location'])

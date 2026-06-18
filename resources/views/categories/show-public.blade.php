@@ -18,7 +18,7 @@
     $ageGate = $ageGate ?? \App\Models\AgeGateSetting::current()->toModalContent();
 
     $loginHref = \Illuminate\Support\Facades\Route::has('login') ? route('login') : '#';
-    $publishHref = \Illuminate\Support\Facades\Route::has('register') ? route('register') : '#';
+    $publishHref = route('advertise');
 
     $footerGroups = [
         'Información' => [
