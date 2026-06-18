@@ -16,10 +16,10 @@ class PublicPostSearchTest extends TestCase
         $firstCategory = $this->category('Primera', 'primera');
         $secondCategory = $this->category('Segunda', 'segunda');
 
-        $this->post($firstCategory, 'Primera Lima Alpha', 'primera-lima-alpha', 'Lima');
-        $this->post($firstCategory, 'Primera Barranco Beta', 'primera-barranco-beta', 'Barranco');
-        $this->post($secondCategory, 'Segunda Lima Beta', 'segunda-lima-beta', 'Lima');
-        $this->post($secondCategory, 'Segunda Barranco Alpha', 'segunda-barranco-alpha', 'Barranco');
+        $this->createPost($firstCategory, 'Primera Lima Alpha', 'primera-lima-alpha', 'Lima');
+        $this->createPost($firstCategory, 'Primera Barranco Beta', 'primera-barranco-beta', 'Barranco');
+        $this->createPost($secondCategory, 'Segunda Lima Beta', 'segunda-lima-beta', 'Lima');
+        $this->createPost($secondCategory, 'Segunda Barranco Alpha', 'segunda-barranco-alpha', 'Barranco');
 
         $cases = [
             'sin filtros' => [
@@ -77,9 +77,9 @@ class PublicPostSearchTest extends TestCase
         $firstCategory = $this->category('Primera', 'primera');
         $secondCategory = $this->category('Segunda', 'segunda');
 
-        $this->post($firstCategory, 'Coincide', 'coincide', 'Miraflores');
-        $this->post($firstCategory, 'Otra ubicación', 'otra-ubicacion', 'Barranco');
-        $this->post($secondCategory, 'Otra categoría', 'otra-categoria', 'Miraflores');
+        $this->createPost($firstCategory, 'Coincide', 'coincide', 'Miraflores');
+        $this->createPost($firstCategory, 'Otra ubicación', 'otra-ubicacion', 'Barranco');
+        $this->createPost($secondCategory, 'Otra categoría', 'otra-categoria', 'Miraflores');
 
         $this->get(route('posts.search', [
             'category' => 'primera',
@@ -95,8 +95,8 @@ class PublicPostSearchTest extends TestCase
     public function test_search_options_and_results_only_use_public_posts(): void
     {
         $category = $this->category('Activa', 'activa');
-        $this->post($category, 'Post público', 'post-publico', 'Lima', true);
-        $this->post($category, 'Post oculto', 'post-oculto', 'Comas', false);
+        $this->createPost($category, 'Post público', 'post-publico', 'Lima', true);
+        $this->createPost($category, 'Post oculto', 'post-oculto', 'Comas', false);
 
         $this->get('/')
             ->assertOk()
@@ -114,7 +114,7 @@ class PublicPostSearchTest extends TestCase
         $category = $this->category('Paginada', 'paginada');
 
         foreach (range(1, 21) as $number) {
-            $this->post(
+            $this->createPost(
                 $category,
                 "Coincide {$number}",
                 "coincide-{$number}",
@@ -149,7 +149,7 @@ class PublicPostSearchTest extends TestCase
         ]);
     }
 
-    private function post(Category $category, string $title, string $slug, string $location, bool $active = true): Post
+    private function createPost(Category $category, string $title, string $slug, string $location, bool $active = true): Post
     {
         return Post::query()->create([
             'category_id' => $category->id,

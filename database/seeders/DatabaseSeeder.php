@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             LocationSeeder::class,
             FooterSeeder::class,
+            DemoContentSeeder::class,
         ]);
 
         // Resetear cache de permisos

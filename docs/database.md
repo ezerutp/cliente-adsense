@@ -152,15 +152,29 @@ de contacto de la vista pública para anunciar.
 - Rellena `footer_columns` cuando está vacío.
 - No sobrescribe un footer personalizado.
 
+### `DemoContentSeeder`
+
+Carga contenido demostrativo de forma idempotente y en este orden:
+
+1. Integraciones activas de WhatsApp y Telegram.
+2. Plantillas de cards `Perfil` y `Atención`.
+3. Tres categorías con imágenes de Pexels.
+4. Diez posts por categoría, para un total de 30.
+
+Cada post recibe una portada, cuatro imágenes de galería, datos de contacto y
+copias de las dos cards. Usa `updateOrCreate`, por lo que puede ejecutarse
+nuevamente sin duplicar el contenido demo.
+
 ### `DatabaseSeeder`
 
 1. Ejecuta `LocationSeeder`.
 2. Ejecuta `FooterSeeder`.
-3. Limpia cache de permisos.
-4. Crea 25 permisos.
-5. Crea roles `admin`, `editor` y `viewer`.
-6. Sincroniza permisos por rol.
-7. Crea el administrador de desarrollo.
+3. Ejecuta `DemoContentSeeder`.
+4. Limpia cache de permisos.
+5. Crea 25 permisos.
+6. Crea roles `admin`, `editor` y `viewer`.
+7. Sincroniza permisos por rol.
+8. Crea el administrador de desarrollo.
 
 ## Permisos sembrados
 
@@ -184,6 +198,7 @@ php artisan migrate:status
 php artisan db:seed
 php artisan db:seed --class=Database\\Seeders\\LocationSeeder
 php artisan db:seed --class=Database\\Seeders\\FooterSeeder
+php artisan db:seed --class=Database\\Seeders\\DemoContentSeeder
 php artisan migrate:fresh --seed
 ```
 
