@@ -10,6 +10,7 @@ Campos:
 - Slug opcional.
 - Descripción.
 - URL de imagen.
+- Archivo de imagen JPEG, PNG o WebP como alternativa a la URL.
 - Orden.
 - Estado activo.
 
@@ -45,3 +46,5 @@ Ruta:
 ```
 
 Lista posts visibles y reutiliza el directorio dinámico de ubicaciones.
+
+Si se envían URL y archivo, el archivo subido tiene prioridad.

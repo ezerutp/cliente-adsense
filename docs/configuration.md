@@ -61,6 +61,7 @@ La pantalla se divide en:
 - Título del sitio.
 - Subtítulo.
 - URL de imagen de portada.
+- Archivo de imagen para el banner como alternativa a la URL.
 
 El nombre de marca se guarda en dos partes para respetar el diseño bicolor del
 header. El texto principal usa `--site-text` y el destacado usa
@@ -166,3 +167,59 @@ Los providers no personalizados son únicos; se permiten varias integraciones `c
 ## Seguridad
 
 No guardar secretos sensibles en `credentials` sin cifrado adicional. El campo tiene cast JSON, no cifrado automático.
+
+## Carga segura de imágenes
+
+Categorías, portada del sitio, portada del post y galería aceptan JPEG, PNG y
+WebP. Se conserva la opción de URL externa.
+
+El flujo de carga:
+
+1. Valida error de carga, tamaño, MIME detectado, extensión y dimensiones.
+2. Rechaza SVG y formatos no permitidos.
+3. Decodifica y vuelve a codificar el contenido como WebP.
+4. Elimina metadatos y cualquier contenido adicional incrustado.
+5. Genera el nombre mediante UUID y almacena en el disco público.
+
+El procesador usa Imagick o GD cuando están disponibles, con ImageMagick como
+fallback. Los límites se configuran mediante variables `IMAGE_UPLOAD_*`.
+
+El disco predeterminado es `public`. En una instalación nueva debe existir el
+enlace público:
+
+```bash
+php artisan storage:link
+```
+
+Variables disponibles:
+
+```dotenv
+IMAGE_UPLOAD_DISK=public
+IMAGE_UPLOAD_MAX_KB=10240
+IMAGE_UPLOAD_MAX_WIDTH=6000
+IMAGE_UPLOAD_MAX_HEIGHT=6000
+IMAGE_UPLOAD_MAX_PIXELS=25000000
+IMAGE_UPLOAD_OUTPUT_MAX_WIDTH=2400
+IMAGE_UPLOAD_OUTPUT_MAX_HEIGHT=2400
+IMAGE_UPLOAD_WEBP_QUALITY=85
+```
+
+### Diagnóstico de errores de carga
+
+El dashboard incluye un middleware que detecta fallos de transporte antes de la
+validación normal. Cuando una carga falla, muestra un modal con:
+
+- Mensaje normalizado para la persona administradora.
+- Acción recomendada.
+- Bloque técnico desplegable con campo, archivo, código PHP, límites efectivos,
+  `CONTENT_LENGTH` y SAPI.
+
+Los límites de la aplicación no pueden ampliar los límites de PHP. En el entorno
+local actual, `/etc/php.ini` debe ajustarse si se desean archivos mayores de 2 MB:
+
+```ini
+upload_max_filesize = 10M
+post_max_size = 128M
+```
+
+Después del cambio debe reiniciarse el servidor PHP.

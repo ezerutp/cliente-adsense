@@ -8,17 +8,24 @@ use App\Models\Location;
 use App\Models\Post;
 use App\Models\PostCard;
 use App\Models\SiteSetting;
+use App\Support\SecureImageUploader;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Throwable;
 
 class PostController extends Controller
 {
+    public function __construct(private readonly SecureImageUploader $imageUploader)
+    {
+    }
+
     public function index(): View
     {
         $posts = Post::query()
@@ -45,11 +52,37 @@ class PostController extends Controller
         $data = $this->validatedData($request);
         $cards = $this->validatedCards($request);
         $data['slug'] = $this->uniqueSlug($data['title']);
+        $uploadedUrls = [];
 
-        DB::transaction(function () use ($data, $cards): void {
-            $post = Post::create($data);
-            $this->syncCards($post, $cards);
-        });
+        try {
+            if ($request->hasFile('cover_image_file')) {
+                $data['cover_image_url'] = $this->imageUploader->upload(
+                    $request->file('cover_image_file'),
+                    'posts/covers',
+                    'cover_image_file',
+                );
+                $uploadedUrls[] = $data['cover_image_url'];
+            }
+
+            $galleryUploads = $this->imageUploader->uploadMany(
+                $request->file('gallery_image_files', []),
+                'posts/gallery',
+                'gallery_image_files',
+            );
+            $uploadedUrls = array_merge($uploadedUrls, $galleryUploads);
+            $data['gallery_image_urls'] = array_merge($data['gallery_image_urls'], $galleryUploads);
+
+            DB::transaction(function () use ($data, $cards): void {
+                $post = Post::create($data);
+                $this->syncCards($post, $cards);
+            });
+        } catch (Throwable $exception) {
+            foreach ($uploadedUrls as $url) {
+                $this->imageUploader->deleteManagedUrl($url);
+            }
+
+            throw $exception;
+        }
 
         return redirect()
             ->route('posts.index')
@@ -74,15 +107,51 @@ class PostController extends Controller
     {
         $data = $this->validatedData($request);
         $cards = $this->validatedCards($request);
+        $oldCoverUrl = $post->cover_image_url;
+        $oldGalleryUrls = $post->gallery_image_urls ?? [];
+        $uploadedUrls = [];
 
         if ($post->title !== $data['title']) {
             $data['slug'] = $this->uniqueSlug($data['title'], $post);
         }
 
-        DB::transaction(function () use ($post, $data, $cards): void {
-            $post->update($data);
-            $this->syncCards($post, $cards);
-        });
+        try {
+            if ($request->hasFile('cover_image_file')) {
+                $data['cover_image_url'] = $this->imageUploader->upload(
+                    $request->file('cover_image_file'),
+                    'posts/covers',
+                    'cover_image_file',
+                );
+                $uploadedUrls[] = $data['cover_image_url'];
+            }
+
+            $galleryUploads = $this->imageUploader->uploadMany(
+                $request->file('gallery_image_files', []),
+                'posts/gallery',
+                'gallery_image_files',
+            );
+            $uploadedUrls = array_merge($uploadedUrls, $galleryUploads);
+            $data['gallery_image_urls'] = array_merge($data['gallery_image_urls'], $galleryUploads);
+
+            DB::transaction(function () use ($post, $data, $cards): void {
+                $post->update($data);
+                $this->syncCards($post, $cards);
+            });
+        } catch (Throwable $exception) {
+            foreach ($uploadedUrls as $url) {
+                $this->imageUploader->deleteManagedUrl($url);
+            }
+
+            throw $exception;
+        }
+
+        if ($post->cover_image_url !== $oldCoverUrl) {
+            $this->imageUploader->deleteManagedUrl($oldCoverUrl);
+        }
+
+        foreach (array_diff($oldGalleryUrls, $post->gallery_image_urls ?? []) as $removedUrl) {
+            $this->imageUploader->deleteManagedUrl($removedUrl);
+        }
 
         return redirect()
             ->route('posts.index')
@@ -91,7 +160,16 @@ class PostController extends Controller
 
     public function destroy(Post $post): RedirectResponse
     {
+        $imageUrls = array_filter([
+            $post->cover_image_url,
+            ...($post->gallery_image_urls ?? []),
+        ]);
+
         $post->delete();
+
+        foreach ($imageUrls as $imageUrl) {
+            $this->imageUploader->deleteManagedUrl($imageUrl);
+        }
 
         return redirect()
             ->route('posts.index')
@@ -152,8 +230,11 @@ class PostController extends Controller
             'subtitle' => ['nullable', 'string', 'max:255'],
             'location' => ['required', 'string', 'max:255', Rule::exists('locations', 'name')],
             'body' => ['required', 'string'],
-            'cover_image_url' => ['nullable', 'url', 'max:2048'],
+            'cover_image_url' => ['nullable', 'url:http,https', 'max:2048'],
+            'cover_image_file' => $this->imageUploader->validationRules(),
             'gallery_image_urls' => ['nullable', 'string'],
+            'gallery_image_files' => ['nullable', 'array', 'max:12'],
+            'gallery_image_files.*' => $this->imageUploader->validationRules(),
             'whatsapp_country_code' => ['nullable', 'string', 'max:8'],
             'whatsapp_number' => ['nullable', 'string', 'max:32'],
             'telegram_username' => ['nullable', 'string', 'max:64'],
@@ -168,7 +249,7 @@ class PostController extends Controller
         $this->validatePublicationWindow($data);
 
         $data['location'] = trim($data['location']);
-        $data['gallery_image_urls'] = $this->linesToArray($data['gallery_image_urls'] ?? null);
+        $data['gallery_image_urls'] = $this->validatedImageUrls($data['gallery_image_urls'] ?? null);
         $data['tags'] = $this->tagsToArray($data['tags'] ?? null);
         $data = array_merge($data, $this->buildContactUrls($data));
         $data['is_active'] = $request->boolean('is_active');
@@ -176,7 +257,7 @@ class PostController extends Controller
             ? $data['published_at']
             : now();
 
-        unset($data['publish_mode']);
+        unset($data['publish_mode'], $data['cover_image_file'], $data['gallery_image_files']);
 
         return $data;
     }
@@ -192,6 +273,30 @@ class PostController extends Controller
             ->filter()
             ->values()
             ->all();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function validatedImageUrls(?string $value): array
+    {
+        $urls = $this->linesToArray($value);
+        $validator = Validator::make(
+            ['urls' => $urls],
+            [
+                'urls.*' => ['url:http,https', 'max:2048'],
+            ],
+            [],
+            ['urls.*' => 'URL de galería'],
+        );
+
+        if ($validator->fails()) {
+            throw ValidationException::withMessages([
+                'gallery_image_urls' => $validator->errors()->first(),
+            ]);
+        }
+
+        return $urls;
     }
 
     /**

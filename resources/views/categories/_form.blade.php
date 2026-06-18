@@ -4,7 +4,7 @@
     $submitLabel = $submitLabel ?? 'Guardar';
 @endphp
 
-<form method="POST" action="{{ $action }}" class="space-y-6">
+<form method="POST" action="{{ $action }}" enctype="multipart/form-data" class="space-y-6">
     @csrf
     @if ($method !== 'POST')
         @method($method)
@@ -48,17 +48,41 @@
         <x-input-error class="mt-2" :messages="$errors->get('description')" />
     </div>
 
-    <div>
-        <x-input-label for="image_url" value="URL de imagen" />
-        <x-text-input
-            id="image_url"
-            name="image_url"
-            type="url"
-            class="mt-1 block w-full"
-            :value="old('image_url', $category?->image_url)"
-            placeholder="https://..."
-        />
-        <x-input-error class="mt-2" :messages="$errors->get('image_url')" />
+    <div class="rounded-lg border border-gray-200 p-4">
+        <h3 class="text-sm font-semibold text-gray-900">Imagen de categoría</h3>
+        <p class="mt-1 text-sm text-gray-500">Puedes conservar una URL o subir una imagen. Si completas ambas, el archivo subido tendrá prioridad.</p>
+
+        <div class="mt-4 grid gap-5 sm:grid-cols-2">
+            <div>
+                <x-input-label for="image_url" value="URL de imagen" />
+                <x-text-input
+                    id="image_url"
+                    name="image_url"
+                    type="url"
+                    class="mt-1 block w-full"
+                    :value="old('image_url', $category?->image_url)"
+                    placeholder="https://..."
+                />
+                <x-input-error class="mt-2" :messages="$errors->get('image_url')" />
+            </div>
+
+            <div>
+                <x-input-label for="image_file" value="Subir imagen" />
+                <input
+                    id="image_file"
+                    name="image_file"
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                    class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm text-gray-700 file:mr-4 file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:font-semibold file:text-gray-700 hover:file:bg-gray-200"
+                >
+                <p class="mt-2 text-xs text-gray-500">JPEG, PNG o WebP. Máximo actual del servidor: {{ app(\App\Support\SecureImageUploader::class)->effectiveMaxMegabytes() }} MB.</p>
+                <x-input-error class="mt-2" :messages="$errors->get('image_file')" />
+            </div>
+        </div>
+
+        @if ($category?->image_url)
+            <img src="{{ $category->image_url }}" alt="Imagen actual de {{ $category->name }}" class="mt-4 h-28 w-44 rounded-lg object-cover">
+        @endif
     </div>
 
     <div class="grid gap-6 sm:grid-cols-2">

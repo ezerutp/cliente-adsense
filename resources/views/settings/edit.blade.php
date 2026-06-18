@@ -112,7 +112,7 @@
                 x-cloak
                 class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
             >
-                <form method="POST" action="{{ route('settings.update') }}" class="space-y-8 p-6">
+                <form method="POST" action="{{ route('settings.update') }}" enctype="multipart/form-data" class="space-y-8 p-6">
                     @csrf
                     @method('PUT')
                     <input type="hidden" name="settings_section" x-model="section">
@@ -178,17 +178,41 @@
                             <x-input-error class="mt-2" :messages="$errors->get('site_subtitle')" />
                         </div>
 
-                        <div>
-                            <x-input-label for="cover_image_url" value="Foto de portada" />
-                            <x-text-input
-                                id="cover_image_url"
-                                name="cover_image_url"
-                                type="url"
-                                class="mt-1 block w-full"
-                                :value="old('cover_image_url', $settings->cover_image_url)"
-                                placeholder="https://..."
-                            />
-                            <x-input-error class="mt-2" :messages="$errors->get('cover_image_url')" />
+                        <div class="rounded-lg border border-gray-200 p-4">
+                            <h4 class="text-sm font-semibold text-gray-900">Banner de portada</h4>
+                            <p class="mt-1 text-sm text-gray-500">Puedes usar una URL o subir una imagen. El archivo tendrá prioridad cuando se envíen ambos.</p>
+
+                            <div class="mt-4 grid gap-5 sm:grid-cols-2">
+                                <div>
+                                    <x-input-label for="cover_image_url" value="URL del banner" />
+                                    <x-text-input
+                                        id="cover_image_url"
+                                        name="cover_image_url"
+                                        type="url"
+                                        class="mt-1 block w-full"
+                                        :value="old('cover_image_url', $settings->cover_image_url)"
+                                        placeholder="https://..."
+                                    />
+                                    <x-input-error class="mt-2" :messages="$errors->get('cover_image_url')" />
+                                </div>
+
+                                <div>
+                                    <x-input-label for="cover_image_file" value="Subir banner" />
+                                    <input
+                                        id="cover_image_file"
+                                        name="cover_image_file"
+                                        type="file"
+                                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                                        class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm text-gray-700 file:mr-4 file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:font-semibold file:text-gray-700 hover:file:bg-gray-200"
+                                    >
+                                    <p class="mt-2 text-xs text-gray-500">JPEG, PNG o WebP. Máximo actual del servidor: {{ app(\App\Support\SecureImageUploader::class)->effectiveMaxMegabytes() }} MB.</p>
+                                    <x-input-error class="mt-2" :messages="$errors->get('cover_image_file')" />
+                                </div>
+                            </div>
+
+                            @if ($settings->cover_image_url)
+                                <img src="{{ $settings->cover_image_url }}" alt="Banner actual" class="mt-4 h-36 w-full rounded-lg object-cover">
+                            @endif
                         </div>
                     </section>
 

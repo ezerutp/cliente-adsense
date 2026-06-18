@@ -52,6 +52,9 @@ Exige fecha de publicación.
 - `cover_image_url`: portada.
 - `gallery_image_urls`: JSON con URLs.
 - El formulario acepta una URL por línea.
+- La portada también acepta un archivo.
+- La galería permite cargar hasta 12 archivos por envío.
+- Las imágenes subidas se agregan después de las URLs escritas.
 - La vista también tolera saltos de línea dentro de elementos históricos.
 
 La galería modal incluye portada y todas las entradas adicionales.

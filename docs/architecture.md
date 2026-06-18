@@ -70,6 +70,7 @@ Los modelos usan atributos `#[Fillable]`, casts y relaciones Eloquent:
 - `PublicLocationDirectory`
 - `PublicNavigation`
 - `PublicSearchOptions`
+- `SecureImageUploader`
 
 ### Vistas
 
@@ -84,8 +85,9 @@ Los modelos usan atributos `#[Fillable]`, casts y relaciones Eloquent:
 1. El administrador abre `/dashboard/posts/create`.
 2. El controlador carga categorías, ubicaciones, integraciones y plantillas de cards.
 3. El formulario valida ubicación obligatoria, fechas, imágenes, tags y contactos.
-4. `PostController` construye URLs de contacto.
-5. Post y cards se guardan dentro de una transacción.
+4. `SecureImageUploader` re-codifica los archivos aceptados y genera URLs públicas.
+5. `PostController` combina URLs de galería y archivos subidos, y construye contactos.
+6. Post y cards se guardan dentro de una transacción.
 
 ### Consulta pública
 

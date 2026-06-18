@@ -38,5 +38,7 @@
                 {{ $slot }}
             </main>
         </div>
+
+        <x-upload-error-modal />
     </body>
 </html>

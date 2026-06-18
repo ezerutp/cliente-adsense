@@ -5,14 +5,21 @@ namespace App\Http\Controllers;
 use App\Models\AgeGateSetting;
 use App\Models\Location;
 use App\Models\SiteSetting;
+use App\Support\SecureImageUploader;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Throwable;
 
 class SiteSettingController extends Controller
 {
+    public function __construct(private readonly SecureImageUploader $imageUploader)
+    {
+    }
+
     public function edit(): View
     {
         return view('settings.edit', [
@@ -34,9 +41,32 @@ class SiteSettingController extends Controller
         $settings = SiteSetting::current();
         $ageGateSettings = AgeGateSetting::current();
         $data = $this->validatedData($request);
+        $oldCoverUrl = $settings->cover_image_url;
+        $uploadedUrl = null;
 
-        $settings->update($data['site']);
-        $ageGateSettings->update($data['age_gate']);
+        try {
+            if ($request->hasFile('cover_image_file')) {
+                $uploadedUrl = $this->imageUploader->upload(
+                    $request->file('cover_image_file'),
+                    'settings/banners',
+                    'cover_image_file',
+                );
+                $data['site']['cover_image_url'] = $uploadedUrl;
+            }
+
+            DB::transaction(function () use ($settings, $ageGateSettings, $data): void {
+                $settings->update($data['site']);
+                $ageGateSettings->update($data['age_gate']);
+            });
+        } catch (Throwable $exception) {
+            $this->imageUploader->deleteManagedUrl($uploadedUrl);
+
+            throw $exception;
+        }
+
+        if ($settings->cover_image_url !== $oldCoverUrl) {
+            $this->imageUploader->deleteManagedUrl($oldCoverUrl);
+        }
 
         $section = in_array($request->input('settings_section'), ['cover', 'colors', 'server', 'age', 'footer'], true)
             ? $request->input('settings_section')
@@ -58,7 +88,8 @@ class SiteSettingController extends Controller
             'brand_accent_text' => ['required', 'string', 'max:80'],
             'site_title' => ['required', 'string', 'max:255'],
             'site_subtitle' => ['required', 'string', 'max:500'],
-            'cover_image_url' => ['nullable', 'url', 'max:2048'],
+            'cover_image_url' => ['nullable', 'url:http,https', 'max:2048'],
+            'cover_image_file' => $this->imageUploader->validationRules(),
             'primary_color' => $hex,
             'primary_hover_color' => $hex,
             'text_color' => $hex,
@@ -149,6 +180,7 @@ class SiteSettingController extends Controller
                     'age_gate_exit_label',
                     'age_gate_exit_href',
                     'age_gate_legal_text',
+                    'cover_image_file',
                 ])
                 ->all(),
             'age_gate' => [
@@ -164,4 +196,5 @@ class SiteSettingController extends Controller
             ],
         ];
     }
+
 }

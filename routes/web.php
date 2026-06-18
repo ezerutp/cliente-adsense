@@ -9,6 +9,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicPostBrowseController;
 use App\Http\Controllers\PublicPostSearchController;
 use App\Http\Controllers\SiteSettingController;
+use App\Http\Middleware\DiagnoseImageUploads;
 use App\Models\AgeGateSetting;
 use App\Models\Category;
 use App\Models\Integration;
@@ -104,7 +105,7 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin', DiagnoseImageUploads::class])->group(function () {
     Route::patch('dashboard/categories/{category}/toggle-visibility', [CategoryController::class, 'toggleVisibility'])
         ->name('categories.toggle-visibility');
 

@@ -43,6 +43,7 @@
 <form
     method="POST"
     action="{{ $action }}"
+    enctype="multipart/form-data"
     class="space-y-6"
     x-data="{
         publishMode: @js($publishMode),
@@ -312,29 +313,75 @@
         <x-input-error class="mt-2" :messages="$errors->get('body')" />
     </div>
 
-    <div>
-        <x-input-label for="cover_image_url" value="Imagen de portada" />
-        <x-text-input
-            id="cover_image_url"
-            name="cover_image_url"
-            type="url"
-            class="mt-1 block w-full"
-            :value="old('cover_image_url', $post?->cover_image_url)"
-            placeholder="https://..."
-        />
-        <x-input-error class="mt-2" :messages="$errors->get('cover_image_url')" />
+    <div class="rounded-lg border border-gray-200 p-4">
+        <h3 class="text-sm font-semibold text-gray-900">Imagen de portada</h3>
+        <p class="mt-1 text-sm text-gray-500">La URL sigue disponible. Si también subes un archivo, se usará el archivo.</p>
+
+        <div class="mt-4 grid gap-5 sm:grid-cols-2">
+            <div>
+                <x-input-label for="cover_image_url" value="URL de portada" />
+                <x-text-input
+                    id="cover_image_url"
+                    name="cover_image_url"
+                    type="url"
+                    class="mt-1 block w-full"
+                    :value="old('cover_image_url', $post?->cover_image_url)"
+                    placeholder="https://..."
+                />
+                <x-input-error class="mt-2" :messages="$errors->get('cover_image_url')" />
+            </div>
+
+            <div>
+                <x-input-label for="cover_image_file" value="Subir portada" />
+                <input
+                    id="cover_image_file"
+                    name="cover_image_file"
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                    class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm text-gray-700 file:mr-4 file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:font-semibold file:text-gray-700 hover:file:bg-gray-200"
+                >
+                <p class="mt-2 text-xs text-gray-500">JPEG, PNG o WebP. Máximo actual del servidor: {{ app(\App\Support\SecureImageUploader::class)->effectiveMaxMegabytes() }} MB.</p>
+                <x-input-error class="mt-2" :messages="$errors->get('cover_image_file')" />
+            </div>
+        </div>
+
+        @if ($post?->cover_image_url)
+            <img src="{{ $post->cover_image_url }}" alt="Portada actual de {{ $post->title }}" class="mt-4 h-32 w-52 rounded-lg object-cover">
+        @endif
     </div>
 
-    <div>
-        <x-input-label for="gallery_image_urls" value="Galería de imágenes" />
-        <textarea
-            id="gallery_image_urls"
-            name="gallery_image_urls"
-            rows="4"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            placeholder="https://imagen-1.jpg&#10;https://imagen-2.jpg"
-        >{{ $galleryValue }}</textarea>
-        <x-input-error class="mt-2" :messages="$errors->get('gallery_image_urls')" />
+    <div class="rounded-lg border border-gray-200 p-4">
+        <h3 class="text-sm font-semibold text-gray-900">Galería de imágenes</h3>
+        <p class="mt-1 text-sm text-gray-500">Las URLs se escriben una por línea. Los archivos seleccionados se añadirán al final de esa lista.</p>
+
+        <div class="mt-4 grid gap-5 sm:grid-cols-2">
+            <div>
+                <x-input-label for="gallery_image_urls" value="URLs de galería" />
+                <textarea
+                    id="gallery_image_urls"
+                    name="gallery_image_urls"
+                    rows="5"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    placeholder="https://imagen-1.jpg&#10;https://imagen-2.jpg"
+                >{{ $galleryValue }}</textarea>
+                <x-input-error class="mt-2" :messages="$errors->get('gallery_image_urls')" />
+            </div>
+
+            <div>
+                <x-input-label for="gallery_image_files" value="Subir varias imágenes" />
+                <input
+                    id="gallery_image_files"
+                    name="gallery_image_files[]"
+                    type="file"
+                    multiple
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                    class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm text-gray-700 file:mr-4 file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:font-semibold file:text-gray-700 hover:file:bg-gray-200"
+                >
+                <p class="mt-2 text-xs text-gray-500">Hasta 12 archivos JPEG, PNG o WebP; máximo {{ app(\App\Support\SecureImageUploader::class)->effectiveMaxMegabytes() }} MB por archivo.</p>
+                <x-input-error class="mt-2" :messages="$errors->get('gallery_image_files')" />
+                <x-input-error class="mt-2" :messages="$errors->get('gallery_image_files.*')" />
+            </div>
+        </div>
     </div>
 
     <div class="rounded-md border border-gray-200 p-4">

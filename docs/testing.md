@@ -64,6 +64,15 @@ php artisan test --filter=test_all_filter_combinations
 - Solo posts visibles.
 - Render de galería con URLs multilínea.
 
+### Carga de imágenes
+
+- Re-codificación a WebP.
+- Rechazo de scripts renombrados como imagen.
+- Diagnóstico de `UPLOAD_ERR_INI_SIZE` mediante modal.
+- Prioridad del archivo sobre la URL.
+- Combinación de URLs por línea y archivos múltiples en la galería.
+- Carga de banner desde configuración.
+
 ### Búsqueda
 
 Se prueban las ocho combinaciones:
