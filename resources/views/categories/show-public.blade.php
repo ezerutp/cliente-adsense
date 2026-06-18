@@ -28,7 +28,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Posts publicados en la categoría {{ $category->name }}.">
-    <title>{{ $category->name }} | Gatitas Hot</title>
+    <title>{{ $category->name }} | {{ $siteSettings->brandName() }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
@@ -39,7 +39,8 @@
 </head>
 <body class="font-sans antialiased" style="background-color: var(--site-bg); color: var(--site-text);">
     <x-navbar
-        logo="Conejitas Hot"
+        :logo-primary="$siteSettings->brand_primary_text"
+        :logo-accent="$siteSettings->brand_accent_text"
         logo-href="{{ url('/') }}"
         :links="$navLinks"
         :login-href="$loginHref"
@@ -84,8 +85,8 @@
     </main>
 
     <x-footer
-        brand="Gatitas Hot"
-        brand-initials="GH"
+        :brand="$siteSettings->brandName()"
+        :brand-initials="$siteSettings->brandInitials()"
         brand-href="{{ url('/') }}"
         description="Clasificados premium con una experiencia moderna, clara y confiable."
         copyright="Todos los derechos reservados."

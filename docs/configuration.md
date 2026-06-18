@@ -56,9 +56,16 @@ La pantalla se divide en:
 
 ### Portada
 
+- Texto principal del logo.
+- Texto destacado del logo.
 - Título del sitio.
 - Subtítulo.
 - URL de imagen de portada.
+
+El nombre de marca se guarda en dos partes para respetar el diseño bicolor del
+header. El texto principal usa `--site-text` y el destacado usa
+`--site-primary`; el footer concatena ambas partes y genera sus iniciales
+automáticamente.
 
 ### Colores
 

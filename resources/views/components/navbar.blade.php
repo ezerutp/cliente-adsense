@@ -1,5 +1,6 @@
 @props([
-    'logo',
+    'logoPrimary',
+    'logoAccent',
     'logoHref',
     'links' => [],
     'loginHref' => '#',
@@ -9,9 +10,7 @@
 ])
 
 @php
-    $logoWords = explode(' ', $logo, 2);
-    $logoFirstWord = $logoWords[0] ?? $logo;
-    $logoRest = $logoWords[1] ?? '';
+    $logo = trim($logoPrimary.' '.$logoAccent);
     $user = auth()->user();
     $dashboardHref = \Illuminate\Support\Facades\Route::has('dashboard') ? route('dashboard') : url('/');
 @endphp
@@ -23,9 +22,9 @@
                 <x-application-logo class="size-7" />
             </span>
             <span class="inline-flex min-w-0 items-baseline gap-1 text-3xl leading-none" style="font-family: 'Dancing Script', cursive !important; font-weight: 700;">
-                <span style="color: #111111;">{{ $logoFirstWord }}</span>
-                @if ($logoRest !== '')
-                    <span style="color: #E10600;">{{ $logoRest }}</span>
+                <span style="color: var(--site-text);">{{ $logoPrimary }}</span>
+                @if ($logoAccent !== '')
+                    <span style="color: var(--site-primary);">{{ $logoAccent }}</span>
                 @endif
             </span>
         </a>

@@ -54,6 +54,8 @@ class SiteSettingController extends Controller
         $hex = ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'];
 
         $data = $request->validate([
+            'brand_primary_text' => ['required', 'string', 'max:80'],
+            'brand_accent_text' => ['required', 'string', 'max:80'],
             'site_title' => ['required', 'string', 'max:255'],
             'site_subtitle' => ['required', 'string', 'max:500'],
             'cover_image_url' => ['nullable', 'url', 'max:2048'],

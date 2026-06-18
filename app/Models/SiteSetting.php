@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 
 #[Fillable([
+    'brand_primary_text',
+    'brand_accent_text',
     'site_title',
     'site_subtitle',
     'cover_image_url',
@@ -63,6 +65,8 @@ class SiteSetting extends Model
     ];
 
     public const DEFAULTS = [
+        'brand_primary_text' => 'Conejitas',
+        'brand_accent_text' => 'Hot',
         'site_title' => 'Encuentra perfiles destacados cerca de ti',
         'site_subtitle' => 'Explora anuncios verificados con filtros rápidos, experiencia limpia y una navegación diseñada para inspirar confianza.',
         'cover_image_url' => 'https://www.skokka.com.pe/static/assets/ES_HERO_DESKTOP_2400x1220_1.9b9e620ff0b74030d571.jpg',
@@ -117,8 +121,10 @@ class SiteSetting extends Model
 
         $defaults = self::DEFAULTS;
 
-        if (! Schema::hasColumn('site_settings', 'footer_columns')) {
-            unset($defaults['footer_columns']);
+        foreach (['brand_primary_text', 'brand_accent_text', 'footer_columns'] as $column) {
+            if (! Schema::hasColumn('site_settings', $column)) {
+                unset($defaults[$column]);
+            }
         }
 
         return self::query()->firstOrCreate(['id' => 1], $defaults);
@@ -129,6 +135,19 @@ class SiteSetting extends Model
         return [
             'footer_columns' => 'array',
         ];
+    }
+
+    public function brandName(): string
+    {
+        return trim($this->brand_primary_text.' '.$this->brand_accent_text);
+    }
+
+    public function brandInitials(): string
+    {
+        return mb_strtoupper(
+            mb_substr($this->brand_primary_text, 0, 1)
+            .mb_substr($this->brand_accent_text, 0, 1),
+        );
     }
 
     /**

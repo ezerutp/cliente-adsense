@@ -119,7 +119,38 @@
 
                     <section x-show="section === 'cover'" x-cloak class="space-y-6">
                         <div>
-                            <h3 class="text-base font-semibold text-gray-900">Portada</h3>
+                            <h3 class="text-base font-semibold text-gray-900">Marca y portada</h3>
+                            <p class="mt-1 text-sm text-gray-600">
+                                El nombre se divide en dos partes para conservar el diseño bicolor del logo.
+                            </p>
+                        </div>
+
+                        <div class="grid gap-6 sm:grid-cols-2">
+                            <div>
+                                <x-input-label for="brand_primary_text" value="Texto principal del logo" />
+                                <x-text-input
+                                    id="brand_primary_text"
+                                    name="brand_primary_text"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    :value="old('brand_primary_text', $settings->brand_primary_text)"
+                                    required
+                                />
+                                <x-input-error class="mt-2" :messages="$errors->get('brand_primary_text')" />
+                            </div>
+
+                            <div>
+                                <x-input-label for="brand_accent_text" value="Texto destacado del logo" />
+                                <x-text-input
+                                    id="brand_accent_text"
+                                    name="brand_accent_text"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    :value="old('brand_accent_text', $settings->brand_accent_text)"
+                                    required
+                                />
+                                <x-input-error class="mt-2" :messages="$errors->get('brand_accent_text')" />
+                            </div>
                         </div>
 
                         <div>

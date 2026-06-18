@@ -77,8 +77,9 @@ is_active
 
 ### `site_settings`
 
-Registro singleton con textos, colores, parámetros regionales y `footer_columns`
-como JSON para las columnas y enlaces del footer público.
+Registro singleton con nombre de marca dividido en texto principal/destacado,
+textos de portada, colores, parámetros regionales y `footer_columns` como JSON
+para las columnas y enlaces del footer público.
 
 ### `age_gate_settings`
 

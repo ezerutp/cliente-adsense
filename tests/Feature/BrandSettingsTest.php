@@ -9,72 +9,38 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-class FooterSettingsTest extends TestCase
+class BrandSettingsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_can_update_footer_columns_and_the_public_footer_uses_them(): void
+    public function test_admin_can_update_the_brand_used_by_header_footer_and_page_title(): void
     {
-        $columns = [
-            [
-                'title' => 'Recursos',
-                'items' => [
-                    ['label' => 'Guía personalizada', 'href' => '/#guia'],
-                    ['label' => 'Publicar ahora', 'href' => '/publicar-anuncio'],
-                ],
-            ],
-            [
-                'title' => 'Legal',
-                'items' => [
-                    ['label' => 'Privacidad personalizada', 'href' => 'https://example.com/privacidad'],
-                ],
-            ],
-        ];
+        $payload = $this->settingsPayload();
+        $payload['brand_primary_text'] = 'Nueva Marca';
+        $payload['brand_accent_text'] = 'Premium';
 
         $this->actingAs($this->admin())
-            ->put(route('settings.update'), $this->settingsPayload($columns))
+            ->put(route('settings.update'), $payload)
             ->assertSessionHasNoErrors()
-            ->assertRedirect(route('settings.edit').'#footer');
-
-        $this->assertSame($columns, SiteSetting::current()->refresh()->footer_columns);
+            ->assertRedirect(route('settings.edit').'#cover');
 
         $this->get('/')
             ->assertOk()
-            ->assertSee('Recursos')
-            ->assertSee('Guía personalizada')
-            ->assertSee('/#guia')
-            ->assertSee('Privacidad personalizada')
-            ->assertDontSee('Centro de ayuda');
-    }
-
-    public function test_footer_rejects_unsafe_links(): void
-    {
-        $columns = [
-            [
-                'title' => 'Enlaces',
-                'items' => [
-                    ['label' => 'Enlace inseguro', 'href' => 'javascript:alert(1)'],
-                ],
-            ],
-        ];
-
-        $this->actingAs($this->admin())
-            ->from(route('settings.edit').'#footer')
-            ->put(route('settings.update'), $this->settingsPayload($columns))
-            ->assertSessionHasErrors('footer_columns');
+            ->assertSee('Nueva Marca')
+            ->assertSee('Premium')
+            ->assertSee('NP');
     }
 
     /**
-     * @param  array<int, array{title: string, items: array<int, array{label: string, href: string}>}>  $columns
      * @return array<string, mixed>
      */
-    private function settingsPayload(array $columns): array
+    private function settingsPayload(): array
     {
         $site = SiteSetting::DEFAULTS;
         $age = AgeGateSetting::DEFAULTS;
 
         return [
-            'settings_section' => 'footer',
+            'settings_section' => 'cover',
             'brand_primary_text' => $site['brand_primary_text'],
             'brand_accent_text' => $site['brand_accent_text'],
             'site_title' => $site['site_title'],
@@ -93,7 +59,7 @@ class FooterSettingsTest extends TestCase
             'server_country' => $site['server_country'],
             'server_country_code' => $site['server_country_code'],
             'server_utc_offset' => $site['server_utc_offset'],
-            'footer_columns' => json_encode($columns, JSON_THROW_ON_ERROR),
+            'footer_columns' => json_encode($site['footer_columns'], JSON_THROW_ON_ERROR),
             'age_gate_is_enabled' => '1',
             'age_gate_storage_key' => $age['storage_key'],
             'age_gate_badge' => $age['badge'],
