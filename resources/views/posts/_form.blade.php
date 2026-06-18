@@ -38,14 +38,51 @@
                 'value' => $field['value'] ?? '',
             ])->values()->all(),
         ])->values()->all() ?? []);
+    $postSectionFields = [
+        'basic' => ['category_id', 'title', 'subtitle', 'location'],
+        'content' => ['body'],
+        'media' => ['cover_image_url', 'cover_image_file', 'gallery_image_urls', 'gallery_image_files'],
+        'contact' => ['whatsapp_country_code', 'whatsapp_number', 'telegram_username', 'sms_country_code', 'sms_number', 'tags'],
+        'cards' => ['post_cards'],
+        'publication' => ['is_active', 'publish_mode', 'published_at', 'ends_at'],
+    ];
+    $initialSection = collect($postSectionFields)
+        ->search(fn (array $fields) => collect($fields)->contains(
+            fn (string $field) => $errors->has($field) || $errors->has($field.'.*'),
+        )) ?: 'basic';
 @endphp
 
 <form
     method="POST"
     action="{{ $action }}"
     enctype="multipart/form-data"
-    class="space-y-6"
+    novalidate
+    class="block"
     x-data="{
+        section: @js($initialSection),
+        sections: ['basic', 'content', 'media', 'contact', 'cards', 'publication'],
+        fieldSections: {
+            category_id: 'basic',
+            title: 'basic',
+            subtitle: 'basic',
+            location: 'basic',
+            body: 'content',
+            cover_image_url: 'media',
+            cover_image_file: 'media',
+            gallery_image_urls: 'media',
+            gallery_image_files: 'media',
+            whatsapp_country_code: 'contact',
+            whatsapp_number: 'contact',
+            telegram_username: 'contact',
+            sms_country_code: 'contact',
+            sms_number: 'contact',
+            tags: 'contact',
+            post_cards: 'cards',
+            is_active: 'publication',
+            publish_mode: 'publication',
+            published_at: 'publication',
+            ends_at: 'publication',
+        },
         publishMode: @js($publishMode),
         cards: @js($postCardsInitial),
         cardTemplates: @js($cardTemplates->toArray()),
@@ -146,12 +183,95 @@
 
             this.insertIntoBody(`\n![Imagen](${url})\n`);
         },
+        goTo(section) {
+            if (! this.sections.includes(section)) return;
+            this.section = section;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+        nextSection() {
+            const index = this.sections.indexOf(this.section);
+            if (index < this.sections.length - 1) this.goTo(this.sections[index + 1]);
+        },
+        previousSection() {
+            const index = this.sections.indexOf(this.section);
+            if (index > 0) this.goTo(this.sections[index - 1]);
+        },
+        validateBeforeSubmit(event) {
+            const invalid = [...this.$el.elements].find(element => ! element.checkValidity());
+            if (! invalid) return;
+
+            event.preventDefault();
+            const baseName = (invalid.name || '').split('[')[0].replace('[]', '');
+            this.goTo(this.fieldSections[baseName] || 'basic');
+            setTimeout(() => {
+                invalid.reportValidity();
+                invalid.focus();
+            }, 250);
+        },
     }"
+    x-init="
+        const hashSection = window.location.hash.replace('#', '');
+        if (sections.includes(hashSection)) section = hashSection;
+        $watch('section', value => history.replaceState(null, '', `#${value}`));
+    "
+    x-on:submit="validateBeforeSubmit($event)"
 >
     @csrf
     @if ($method !== 'POST')
         @method($method)
     @endif
+
+    <div class="grid items-start gap-6 lg:grid-cols-4">
+        <aside class="overflow-hidden bg-white shadow-sm sm:rounded-lg lg:sticky lg:top-6">
+            <div class="border-b border-gray-200 p-5">
+                <p class="text-xs font-semibold uppercase tracking-wider text-indigo-600">
+                    {{ $post ? 'Editar anuncio' : 'Nuevo anuncio' }}
+                </p>
+                <h3 class="mt-1 font-semibold text-gray-900">Completa tu publicación</h3>
+                <p class="mt-1 text-sm text-gray-500">Avanza sección por sección. Puedes volver cuando quieras.</p>
+            </div>
+
+            <nav class="grid gap-1 p-3 sm:grid-cols-2 lg:grid-cols-1" aria-label="Secciones del post">
+                @foreach ([
+                    'basic' => ['1', 'Datos básicos', 'Categoría, título y ubicación'],
+                    'content' => ['2', 'Contenido', 'Descripción principal'],
+                    'media' => ['3', 'Imágenes', 'Portada y galería'],
+                    'contact' => ['4', 'Contacto', 'Canales y etiquetas'],
+                    'cards' => ['5', 'Cards', 'Información adicional'],
+                    'publication' => ['6', 'Publicación', 'Visibilidad y fechas'],
+                ] as $sectionKey => [$step, $sectionLabel, $sectionDescription])
+                    <button
+                        type="button"
+                        x-on:click="goTo('{{ $sectionKey }}')"
+                        class="flex gap-3 rounded-lg px-3 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                        x-bind:class="section === '{{ $sectionKey }}'
+                            ? 'bg-gray-900 text-white shadow-sm'
+                            : 'text-gray-700 hover:bg-gray-100'"
+                        x-bind:aria-current="section === '{{ $sectionKey }}' ? 'step' : null"
+                    >
+                        <span
+                            class="grid size-7 shrink-0 place-items-center rounded-full text-xs font-bold"
+                            x-bind:class="section === '{{ $sectionKey }}' ? 'bg-white text-gray-900' : 'bg-gray-200 text-gray-700'"
+                        >{{ $step }}</span>
+                        <span>
+                            <span class="block text-sm font-semibold">{{ $sectionLabel }}</span>
+                            <span
+                                class="mt-0.5 block text-xs"
+                                x-bind:class="section === '{{ $sectionKey }}' ? 'text-gray-300' : 'text-gray-500'"
+                            >{{ $sectionDescription }}</span>
+                        </span>
+                    </button>
+                @endforeach
+            </nav>
+        </aside>
+
+        <div class="min-w-0 lg:col-span-3">
+            <section x-show="section === 'basic'" x-cloak class="space-y-6 overflow-hidden bg-white p-6 shadow-sm sm:rounded-lg">
+                <div>
+                    <p class="text-sm font-semibold text-indigo-600">Paso 1 de 6</p>
+                    <h3 class="mt-1 text-lg font-semibold text-gray-900">Datos básicos</h3>
+                    <p class="mt-1 text-sm text-gray-600">Define cómo se identificará y dónde aparecerá el anuncio.</p>
+                </div>
 
     <div>
         <x-input-label for="category_id" value="Categoría" />
@@ -225,6 +345,20 @@
             </p>
         @endif
     </div>
+
+                <div class="flex justify-end border-t border-gray-200 pt-6">
+                    <button type="button" class="admin-button-primary" x-on:click="nextSection">
+                        Siguiente: Contenido
+                    </button>
+                </div>
+            </section>
+
+            <section x-show="section === 'content'" x-cloak class="space-y-6 overflow-hidden bg-white p-6 shadow-sm sm:rounded-lg">
+                <div>
+                    <p class="text-sm font-semibold text-indigo-600">Paso 2 de 6</p>
+                    <h3 class="mt-1 text-lg font-semibold text-gray-900">Contenido del anuncio</h3>
+                    <p class="mt-1 text-sm text-gray-600">Escribe una descripción clara y usa las herramientas para enriquecerla.</p>
+                </div>
 
     <div>
         <x-input-label for="body" value="Texto" />
@@ -313,6 +447,21 @@
         <x-input-error class="mt-2" :messages="$errors->get('body')" />
     </div>
 
+                <div class="flex items-center justify-between gap-3 border-t border-gray-200 pt-6">
+                    <button type="button" class="admin-button-cancel" x-on:click="previousSection">Anterior</button>
+                    <button type="button" class="admin-button-primary" x-on:click="nextSection">
+                        Siguiente: Imágenes
+                    </button>
+                </div>
+            </section>
+
+            <section x-show="section === 'media'" x-cloak class="space-y-6 overflow-hidden bg-white p-6 shadow-sm sm:rounded-lg">
+                <div>
+                    <p class="text-sm font-semibold text-indigo-600">Paso 3 de 6</p>
+                    <h3 class="mt-1 text-lg font-semibold text-gray-900">Imágenes</h3>
+                    <p class="mt-1 text-sm text-gray-600">Añade una portada atractiva y completa la galería por URL o archivo.</p>
+                </div>
+
     <div class="rounded-lg border border-gray-200 p-4">
         <h3 class="text-sm font-semibold text-gray-900">Imagen de portada</h3>
         <p class="mt-1 text-sm text-gray-500">La URL sigue disponible. Si también subes un archivo, se usará el archivo.</p>
@@ -383,6 +532,21 @@
             </div>
         </div>
     </div>
+
+                <div class="flex items-center justify-between gap-3 border-t border-gray-200 pt-6">
+                    <button type="button" class="admin-button-cancel" x-on:click="previousSection">Anterior</button>
+                    <button type="button" class="admin-button-primary" x-on:click="nextSection">
+                        Siguiente: Contacto
+                    </button>
+                </div>
+            </section>
+
+            <section x-show="section === 'contact'" x-cloak class="space-y-6 overflow-hidden bg-white p-6 shadow-sm sm:rounded-lg">
+                <div>
+                    <p class="text-sm font-semibold text-indigo-600">Paso 4 de 6</p>
+                    <h3 class="mt-1 text-lg font-semibold text-gray-900">Contacto y etiquetas</h3>
+                    <p class="mt-1 text-sm text-gray-600">Configura los medios disponibles para responder y facilitar el descubrimiento.</p>
+                </div>
 
     <div class="rounded-md border border-gray-200 p-4">
         <h3 class="text-sm font-semibold text-gray-900">Botones de contacto</h3>
@@ -483,6 +647,21 @@
         />
         <x-input-error class="mt-2" :messages="$errors->get('tags')" />
     </div>
+
+                <div class="flex items-center justify-between gap-3 border-t border-gray-200 pt-6">
+                    <button type="button" class="admin-button-cancel" x-on:click="previousSection">Anterior</button>
+                    <button type="button" class="admin-button-primary" x-on:click="nextSection">
+                        Siguiente: Cards
+                    </button>
+                </div>
+            </section>
+
+            <section x-show="section === 'cards'" x-cloak class="space-y-6 overflow-hidden bg-white p-6 shadow-sm sm:rounded-lg">
+                <div>
+                    <p class="text-sm font-semibold text-indigo-600">Paso 5 de 6</p>
+                    <h3 class="mt-1 text-lg font-semibold text-gray-900">Cards informativas</h3>
+                    <p class="mt-1 text-sm text-gray-600">Organiza datos adicionales como atención, perfil o características.</p>
+                </div>
 
     <section class="rounded-md border border-gray-200 p-4">
         <div class="flex items-center justify-between gap-4">
@@ -666,6 +845,21 @@
         <x-input-error class="mt-2" :messages="$errors->get('post_cards')" />
     </section>
 
+                <div class="flex items-center justify-between gap-3 border-t border-gray-200 pt-6">
+                    <button type="button" class="admin-button-cancel" x-on:click="previousSection">Anterior</button>
+                    <button type="button" class="admin-button-primary" x-on:click="nextSection">
+                        Siguiente: Publicación
+                    </button>
+                </div>
+            </section>
+
+            <section x-show="section === 'publication'" x-cloak class="space-y-6 overflow-hidden bg-white p-6 shadow-sm sm:rounded-lg">
+                <div>
+                    <p class="text-sm font-semibold text-indigo-600">Paso 6 de 6</p>
+                    <h3 class="mt-1 text-lg font-semibold text-gray-900">Publicación</h3>
+                    <p class="mt-1 text-sm text-gray-600">Revisa la visibilidad, el momento de publicación y la fecha de finalización.</p>
+                </div>
+
     <div class="flex items-end">
         <label for="is_active" class="inline-flex items-center gap-3 rounded-md border border-gray-200 px-4 py-3">
             <input
@@ -722,12 +916,18 @@
         </div>
     </div>
 
-    <div class="flex items-center justify-end gap-3">
-        <a href="{{ route('posts.index') }}" class="admin-button-cancel">
-            Cancelar
-        </a>
-        <x-primary-button>
-            {{ $submitLabel }}
-        </x-primary-button>
+    <div class="flex flex-col-reverse gap-3 border-t border-gray-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <button type="button" class="admin-button-cancel" x-on:click="previousSection">Anterior</button>
+        <div class="flex items-center justify-end gap-3">
+            <a href="{{ route('posts.index') }}" class="admin-button-cancel">
+                Cancelar
+            </a>
+            <x-primary-button>
+                {{ $submitLabel }}
+            </x-primary-button>
+        </div>
+    </div>
+            </section>
+        </div>
     </div>
 </form>

@@ -12,6 +12,11 @@ Operaciones:
 - Activar/ocultar.
 - Marcar/desmarcar VIP.
 
+Los formularios de creación y edición usan un onboarding 1/4–3/4 con navegación
+lateral y seis pasos: datos básicos, contenido, imágenes, contacto, cards y
+publicación. Los errores abren automáticamente el paso correspondiente y el hash
+de la URL conserva la sección activa.
+
 ## Campos
 
 ### Obligatorios
