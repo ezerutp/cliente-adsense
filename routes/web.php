@@ -105,46 +105,112 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware(['auth', 'verified', 'role:admin', DiagnoseImageUploads::class])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('dashboard/categories/{category}/toggle-visibility', [CategoryController::class, 'toggleVisibility'])
+        ->middleware('permission:categories.publish')
         ->name('categories.toggle-visibility');
-
-    Route::resource('dashboard/categories', CategoryController::class)
-        ->except('show')
-        ->names('categories');
+    Route::get('dashboard/categories', [CategoryController::class, 'index'])
+        ->middleware('permission:categories.view')
+        ->name('categories.index');
+    Route::get('dashboard/categories/create', [CategoryController::class, 'create'])
+        ->middleware('permission:categories.create')
+        ->name('categories.create');
+    Route::post('dashboard/categories', [CategoryController::class, 'store'])
+        ->middleware(['permission:categories.create', DiagnoseImageUploads::class])
+        ->name('categories.store');
+    Route::get('dashboard/categories/{category}/edit', [CategoryController::class, 'edit'])
+        ->middleware('permission:categories.edit')
+        ->name('categories.edit');
+    Route::match(['put', 'patch'], 'dashboard/categories/{category}', [CategoryController::class, 'update'])
+        ->middleware(['permission:categories.edit', DiagnoseImageUploads::class])
+        ->name('categories.update');
+    Route::delete('dashboard/categories/{category}', [CategoryController::class, 'destroy'])
+        ->middleware('permission:categories.delete')
+        ->name('categories.destroy');
 
     Route::patch('dashboard/posts/{post}/toggle-visibility', [PostController::class, 'toggleVisibility'])
+        ->middleware('permission:posts.publish')
         ->name('posts.toggle-visibility');
     Route::patch('dashboard/posts/{post}/toggle-vip', [PostController::class, 'toggleVip'])
+        ->middleware('permission:posts.publish')
         ->name('posts.toggle-vip');
-
-    Route::resource('dashboard/posts', PostController::class)
-        ->except('show')
-        ->names('posts');
+    Route::get('dashboard/posts', [PostController::class, 'index'])
+        ->middleware('permission:posts.view')
+        ->name('posts.index');
+    Route::get('dashboard/posts/create', [PostController::class, 'create'])
+        ->middleware('permission:posts.create')
+        ->name('posts.create');
+    Route::post('dashboard/posts', [PostController::class, 'store'])
+        ->middleware(['permission:posts.create', DiagnoseImageUploads::class])
+        ->name('posts.store');
+    Route::get('dashboard/posts/{post}/edit', [PostController::class, 'edit'])
+        ->middleware('permission:posts.edit')
+        ->name('posts.edit');
+    Route::match(['put', 'patch'], 'dashboard/posts/{post}', [PostController::class, 'update'])
+        ->middleware(['permission:posts.edit', DiagnoseImageUploads::class])
+        ->name('posts.update');
+    Route::delete('dashboard/posts/{post}', [PostController::class, 'destroy'])
+        ->middleware('permission:posts.delete')
+        ->name('posts.destroy');
 
     Route::patch('dashboard/post-cards/{postCard}/toggle-visibility', [PostCardController::class, 'toggleVisibility'])
+        ->middleware('permission:cards.publish')
         ->name('post-cards.toggle-visibility');
-
-    Route::resource('dashboard/post-cards', PostCardController::class)
-        ->except('show')
-        ->names('post-cards');
+    Route::get('dashboard/post-cards', [PostCardController::class, 'index'])
+        ->middleware('permission:cards.view')
+        ->name('post-cards.index');
+    Route::get('dashboard/post-cards/create', [PostCardController::class, 'create'])
+        ->middleware('permission:cards.create')
+        ->name('post-cards.create');
+    Route::post('dashboard/post-cards', [PostCardController::class, 'store'])
+        ->middleware('permission:cards.create')
+        ->name('post-cards.store');
+    Route::get('dashboard/post-cards/{postCard}/edit', [PostCardController::class, 'edit'])
+        ->middleware('permission:cards.edit')
+        ->name('post-cards.edit');
+    Route::match(['put', 'patch'], 'dashboard/post-cards/{postCard}', [PostCardController::class, 'update'])
+        ->middleware('permission:cards.edit')
+        ->name('post-cards.update');
+    Route::delete('dashboard/post-cards/{postCard}', [PostCardController::class, 'destroy'])
+        ->middleware('permission:cards.delete')
+        ->name('post-cards.destroy');
 
     Route::patch('dashboard/integrations/{integration}/toggle-visibility', [IntegrationController::class, 'toggleVisibility'])
+        ->middleware('permission:integrations.publish')
         ->name('integrations.toggle-visibility');
-
-    Route::resource('dashboard/integrations', IntegrationController::class)
-        ->except('show')
-        ->names('integrations');
+    Route::get('dashboard/integrations', [IntegrationController::class, 'index'])
+        ->middleware('permission:integrations.view')
+        ->name('integrations.index');
+    Route::get('dashboard/integrations/create', [IntegrationController::class, 'create'])
+        ->middleware('permission:integrations.create')
+        ->name('integrations.create');
+    Route::post('dashboard/integrations', [IntegrationController::class, 'store'])
+        ->middleware('permission:integrations.create')
+        ->name('integrations.store');
+    Route::get('dashboard/integrations/{integration}/edit', [IntegrationController::class, 'edit'])
+        ->middleware('permission:integrations.edit')
+        ->name('integrations.edit');
+    Route::match(['put', 'patch'], 'dashboard/integrations/{integration}', [IntegrationController::class, 'update'])
+        ->middleware('permission:integrations.edit')
+        ->name('integrations.update');
+    Route::delete('dashboard/integrations/{integration}', [IntegrationController::class, 'destroy'])
+        ->middleware('permission:integrations.delete')
+        ->name('integrations.destroy');
 
     Route::get('dashboard/settings', [SiteSettingController::class, 'edit'])
+        ->middleware('permission:site-settings.view')
         ->name('settings.edit');
     Route::put('dashboard/settings', [SiteSettingController::class, 'update'])
+        ->middleware(['permission:site-settings.edit', DiagnoseImageUploads::class])
         ->name('settings.update');
     Route::post('dashboard/settings/locations', [LocationController::class, 'store'])
+        ->middleware('permission:site-settings.edit')
         ->name('settings.locations.store');
     Route::put('dashboard/settings/locations/{location}', [LocationController::class, 'update'])
+        ->middleware('permission:site-settings.edit')
         ->name('settings.locations.update');
     Route::delete('dashboard/settings/locations/{location}', [LocationController::class, 'destroy'])
+        ->middleware('permission:site-settings.edit')
         ->name('settings.locations.destroy');
 });
 

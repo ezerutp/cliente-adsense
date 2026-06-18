@@ -4,7 +4,8 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 Integraciones
             </h2>
-            <a
+            @can('integrations.create')
+                <a
                 href="{{ route('integrations.create') }}"
                 class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 text-gray-900 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                 title="Crear integración"
@@ -12,7 +13,8 @@
             >
                 <x-heroicon-o-plus class="h-5 w-[18px]" aria-hidden="true" />
                 <span class="sr-only">Crear integración</span>
-            </a>
+                </a>
+            @endcan
         </div>
     </x-slot>
 
@@ -58,7 +60,8 @@
                                     </td>
                                     <td class="px-6 py-4 text-right text-sm font-medium">
                                         <div class="flex justify-end gap-2">
-                                            <button
+                                            @can('integrations.publish')
+                                                <button
                                                 type="button"
                                                 class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 text-gray-900 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                                                 title="{{ $integration->is_active ? 'Ocultar' : 'Publicar' }}"
@@ -72,9 +75,11 @@
                                                     <x-heroicon-o-eye class="h-5 w-[18px]" aria-hidden="true" />
                                                 @endif
                                                 <span class="sr-only">{{ $integration->is_active ? 'Ocultar integración' : 'Publicar integración' }}</span>
-                                            </button>
+                                                </button>
+                                            @endcan
 
-                                            <a
+                                            @can('integrations.edit')
+                                                <a
                                                 href="{{ route('integrations.edit', $integration) }}"
                                                 class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 text-gray-900 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                                                 title="Editar"
@@ -82,9 +87,11 @@
                                             >
                                                 <x-heroicon-o-pencil-square class="h-5 w-[18px]" aria-hidden="true" />
                                                 <span class="sr-only">Editar integración</span>
-                                            </a>
+                                                </a>
+                                            @endcan
 
-                                            <button
+                                            @can('integrations.delete')
+                                                <button
                                                 type="button"
                                                 class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 text-gray-900 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                                                 title="Eliminar"
@@ -94,19 +101,23 @@
                                             >
                                                 <x-heroicon-o-trash class="h-5 w-[18px]" aria-hidden="true" />
                                                 <span class="sr-only">Eliminar integración</span>
-                                            </button>
+                                                </button>
+                                            @endcan
                                         </div>
 
-                                        <x-category-action-modal
+                                        @can('integrations.publish')
+                                            <x-category-action-modal
                                             name="toggle-integration-{{ $integration->id }}"
                                             :title="$integration->is_active ? 'Ocultar integración' : 'Publicar integración'"
                                             :description="$integration->is_active ? 'Esta integración dejará de estar disponible para construir enlaces en posts.' : 'Esta integración volverá a estar disponible para construir enlaces en posts.'"
                                             :action="route('integrations.toggle-visibility', $integration)"
                                             method="PATCH"
                                             :confirm-label="$integration->is_active ? 'Ocultar' : 'Publicar'"
-                                        />
+                                            />
+                                        @endcan
 
-                                        <x-category-action-modal
+                                        @can('integrations.delete')
+                                            <x-category-action-modal
                                             name="delete-integration-{{ $integration->id }}"
                                             title="Eliminar integración"
                                             description="Esta acción eliminará la integración permanentemente."
@@ -114,7 +125,8 @@
                                             method="DELETE"
                                             confirm-label="Eliminar"
                                             variant="danger"
-                                        />
+                                            />
+                                        @endcan
                                     </td>
                                 </tr>
                             @empty
@@ -123,13 +135,15 @@
                                         <div class="flex flex-col items-center justify-center gap-3">
                                             <x-heroicon-o-rectangle-stack class="h-12 w-12 text-gray-400" />
                                             <p class="text-sm font-medium text-gray-500">No hay integraciones creadas</p>
-                                            <a
+                                            @can('integrations.create')
+                                                <a
                                                 href="{{ route('integrations.create') }}"
                                                 class="mt-2 inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                             >
                                                 <x-heroicon-o-plus class="h-5 w-5" />
                                                 Crear primera integración
-                                            </a>
+                                                </a>
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>

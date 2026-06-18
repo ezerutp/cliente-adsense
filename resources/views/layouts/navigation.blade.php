@@ -17,23 +17,31 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    @role('admin')
+                    @can('categories.view')
                         <x-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">
                             {{ __('Categorías') }}
                         </x-nav-link>
+                    @endcan
+                    @can('posts.view')
                         <x-nav-link :href="route('posts.index')" :active="request()->routeIs('posts.*')">
                             {{ __('Posts') }}
                         </x-nav-link>
+                    @endcan
+                    @can('cards.view')
                         <x-nav-link :href="route('post-cards.index')" :active="request()->routeIs('post-cards.*')">
                             {{ __('Cards') }}
                         </x-nav-link>
+                    @endcan
+                    @can('integrations.view')
                         <x-nav-link :href="route('integrations.index')" :active="request()->routeIs('integrations.*')">
                             {{ __('Integraciones') }}
                         </x-nav-link>
+                    @endcan
+                    @can('site-settings.view')
                         <x-nav-link :href="route('settings.edit')" :active="request()->routeIs('settings.*')">
                             {{ __('Configuración') }}
                         </x-nav-link>
-                    @endrole
+                    @endcan
                 </div>
             </div>
 
@@ -89,23 +97,31 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
-            @role('admin')
+            @can('categories.view')
                 <x-responsive-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">
                     {{ __('Categorías') }}
                 </x-responsive-nav-link>
+            @endcan
+            @can('posts.view')
                 <x-responsive-nav-link :href="route('posts.index')" :active="request()->routeIs('posts.*')">
                     {{ __('Posts') }}
                 </x-responsive-nav-link>
+            @endcan
+            @can('cards.view')
                 <x-responsive-nav-link :href="route('post-cards.index')" :active="request()->routeIs('post-cards.*')">
                     {{ __('Cards') }}
                 </x-responsive-nav-link>
+            @endcan
+            @can('integrations.view')
                 <x-responsive-nav-link :href="route('integrations.index')" :active="request()->routeIs('integrations.*')">
                     {{ __('Integraciones') }}
                 </x-responsive-nav-link>
+            @endcan
+            @can('site-settings.view')
                 <x-responsive-nav-link :href="route('settings.edit')" :active="request()->routeIs('settings.*')">
                     {{ __('Configuración') }}
                 </x-responsive-nav-link>
-            @endrole
+            @endcan
         </div>
 
         <!-- Responsive Settings Options -->

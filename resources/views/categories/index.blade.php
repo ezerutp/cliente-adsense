@@ -4,7 +4,8 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 Categorías
             </h2>
-            <a
+            @can('categories.create')
+                <a
                 href="{{ route('categories.create') }}"
                 class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 text-gray-900 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                 title="Crear categoría"
@@ -12,7 +13,8 @@
             >
                 <x-heroicon-o-plus class="h-5 w-[18px]" aria-hidden="true" />
                 <span class="sr-only">Crear categoría</span>
-            </a>
+                </a>
+            @endcan
         </div>
     </x-slot>
 
@@ -63,7 +65,8 @@
                                     </td>
                                     <td class="px-6 py-4 text-right text-sm font-medium">
                                         <div class="flex justify-end gap-2">
-                                            <button
+                                            @can('categories.publish')
+                                                <button
                                                 type="button"
                                                 class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 text-gray-900 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                                                 title="{{ $category->is_active ? 'Ocultar' : 'Publicar' }}"
@@ -77,9 +80,11 @@
                                                     <x-heroicon-o-eye class="h-5 w-[18px]" aria-hidden="true" />
                                                 @endif
                                                 <span class="sr-only">{{ $category->is_active ? 'Ocultar categoría' : 'Publicar categoría' }}</span>
-                                            </button>
+                                                </button>
+                                            @endcan
 
-                                            <a
+                                            @can('categories.edit')
+                                                <a
                                                 href="{{ route('categories.edit', $category) }}"
                                                 class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 text-gray-900 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                                                 title="Editar"
@@ -87,9 +92,11 @@
                                             >
                                                 <x-heroicon-o-pencil-square class="h-5 w-[18px]" aria-hidden="true" />
                                                 <span class="sr-only">Editar categoría</span>
-                                            </a>
+                                                </a>
+                                            @endcan
 
-                                            <button
+                                            @can('categories.delete')
+                                                <button
                                                 type="button"
                                                 class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 text-gray-900 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                                                 title="Eliminar"
@@ -99,10 +106,12 @@
                                             >
                                                 <x-heroicon-o-trash class="h-5 w-[18px]" aria-hidden="true" />
                                                 <span class="sr-only">Eliminar categoría</span>
-                                            </button>
+                                                </button>
+                                            @endcan
                                         </div>
 
-                                        <x-category-action-modal
+                                        @can('categories.publish')
+                                            <x-category-action-modal
                                             name="toggle-category-{{ $category->id }}"
                                             :title="$category->is_active ? 'Ocultar categoría' : 'Publicar categoría'"
                                             :description="$category->is_active ? 'Esta categoría dejará de mostrarse en la portada y en los filtros públicos.' : 'Esta categoría volverá a mostrarse en la portada y en los filtros públicos.'"
@@ -110,9 +119,11 @@
                                             method="PATCH"
                                             :confirm-label="$category->is_active ? 'Ocultar' : 'Publicar'"
                                             :variant="$category->is_active ? 'primary' : 'success'"
-                                        />
+                                            />
+                                        @endcan
 
-                                        <x-category-action-modal
+                                        @can('categories.delete')
+                                            <x-category-action-modal
                                             name="delete-category-{{ $category->id }}"
                                             title="Eliminar categoría"
                                             description="Esta acción eliminará la categoría permanentemente."
@@ -120,7 +131,8 @@
                                             method="DELETE"
                                             confirm-label="Eliminar"
                                             variant="danger"
-                                        />
+                                            />
+                                        @endcan
                                     </td>
                                 </tr>
                             @empty

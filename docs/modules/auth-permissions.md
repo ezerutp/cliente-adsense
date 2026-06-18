@@ -27,15 +27,27 @@ Recibe permisos de contenido para posts, categorías, cards e integraciones.
 
 Recibe permisos de lectura.
 
-## Autorización efectiva actual
+## Autorización efectiva
 
-Las rutas administrativas se agrupan con:
+Todas las rutas administrativas exigen primero:
 
-```php
-middleware(['auth', 'verified', 'role:admin'])
+```text
+auth
+verified
 ```
 
-Esto significa que, aunque editor y viewer tengan permisos, actualmente no acceden al CRUD administrativo por ruta.
+Cada acción añade un permiso específico:
+
+| Acción | Permiso |
+| --- | --- |
+| Listar | `*.view` |
+| Abrir formulario y crear | `*.create` |
+| Abrir formulario y actualizar | `*.edit` |
+| Eliminar | `*.delete` |
+| Activar, ocultar o marcar VIP | `*.publish` |
+
+El rol `admin` actúa como superusuario mediante `Gate::before`. Editor y viewer
+se autorizan exclusivamente según los permisos asignados.
 
 ## Permisos
 
@@ -49,15 +61,13 @@ Se crean permisos para:
 - Usuarios.
 - Roles.
 
-## Próximo nivel recomendado
+Las ubicaciones forman parte de configuración y usan `site-settings.edit`.
 
-Sustituir o complementar `role:admin` con middleware por permiso:
+## Navegación
 
-```php
-permission:posts.edit
-```
-
-También pueden usarse policies para autorización por modelo.
+El menú y los botones de acciones usan `@can`, por lo que no muestran enlaces a
+acciones que el usuario no puede ejecutar. La ruta continúa siendo la autoridad
+final y responde `403` ante accesos manuales no autorizados.
 
 ## Usuario de desarrollo
 

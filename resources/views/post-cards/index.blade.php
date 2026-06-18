@@ -4,7 +4,8 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 Plantillas de Cards
             </h2>
-            <a
+            @can('cards.create')
+                <a
                 href="{{ route('post-cards.create') }}"
                 class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 text-gray-900 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                 title="Crear card"
@@ -12,7 +13,8 @@
             >
                 <x-heroicon-o-plus class="h-5 w-[18px]" aria-hidden="true" />
                 <span class="sr-only">Crear card</span>
-            </a>
+                </a>
+            @endcan
         </div>
     </x-slot>
 
@@ -67,7 +69,8 @@
                                     </td>
                                     <td class="px-6 py-4 text-right text-sm font-medium">
                                         <div class="flex justify-end gap-2">
-                                            <button
+                                            @can('cards.publish')
+                                                <button
                                                 type="button"
                                                 class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 text-gray-900 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                                                 title="{{ $postCard->is_active ? 'Desactivar' : 'Activar' }}"
@@ -81,9 +84,11 @@
                                                     <x-heroicon-o-eye class="h-5 w-[18px]" aria-hidden="true" />
                                                 @endif
                                                 <span class="sr-only">{{ $postCard->is_active ? 'Desactivar card' : 'Activar card' }}</span>
-                                            </button>
+                                                </button>
+                                            @endcan
 
-                                            <a
+                                            @can('cards.edit')
+                                                <a
                                                 href="{{ route('post-cards.edit', $postCard) }}"
                                                 class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 text-gray-900 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                                                 title="Editar"
@@ -91,9 +96,11 @@
                                             >
                                                 <x-heroicon-o-pencil-square class="h-5 w-[18px]" aria-hidden="true" />
                                                 <span class="sr-only">Editar card</span>
-                                            </a>
+                                                </a>
+                                            @endcan
 
-                                            <button
+                                            @can('cards.delete')
+                                                <button
                                                 type="button"
                                                 class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 text-gray-900 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                                                 title="Eliminar"
@@ -103,13 +110,15 @@
                                             >
                                                 <x-heroicon-o-trash class="h-5 w-[18px]" aria-hidden="true" />
                                                 <span class="sr-only">Eliminar card</span>
-                                            </button>
+                                                </button>
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>
 
                                 <!-- Toggle Modal -->
-                                <x-modal name="toggle-post-card-{{ $postCard->id }}" focusable>
+                                @can('cards.publish')
+                                    <x-modal name="toggle-post-card-{{ $postCard->id }}" focusable>
                                     <form method="post" action="{{ route('post-cards.toggle-visibility', $postCard) }}" class="p-6">
                                         @csrf
                                         @method('PATCH')
@@ -135,10 +144,12 @@
                                             </x-primary-button>
                                         </div>
                                     </form>
-                                </x-modal>
+                                    </x-modal>
+                                @endcan
 
                                 <!-- Delete Modal -->
-                                <x-modal name="delete-post-card-{{ $postCard->id }}" focusable>
+                                @can('cards.delete')
+                                    <x-modal name="delete-post-card-{{ $postCard->id }}" focusable>
                                     <form method="post" action="{{ route('post-cards.destroy', $postCard) }}" class="p-6">
                                         @csrf
                                         @method('DELETE')
@@ -160,20 +171,23 @@
                                             </x-danger-button>
                                         </div>
                                     </form>
-                                </x-modal>
+                                    </x-modal>
+                                @endcan
                             @empty
                                 <tr>
                                     <td colspan="5" class="px-6 py-12 text-center">
                                         <div class="flex flex-col items-center justify-center gap-3">
                                             <x-heroicon-o-rectangle-stack class="h-12 w-12 text-gray-400" />
                                             <p class="text-sm font-medium text-gray-500">No hay cards creadas</p>
-                                            <a
+                                            @can('cards.create')
+                                                <a
                                                 href="{{ route('post-cards.create') }}"
                                                 class="mt-2 inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                             >
                                                 <x-heroicon-o-plus class="h-5 w-5" />
                                                 Crear primera card
-                                            </a>
+                                                </a>
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>

@@ -118,5 +118,6 @@ La vista usa un panel 1/4–3/4:
 - Extraer las closures públicas de `routes/web.php` a controladores dedicados.
 - Centralizar la transformación de `Post` a `listing-card`; actualmente existe en más de un controlador/closure.
 - Migrar `posts.location` a clave foránea si se requiere integridad relacional estricta.
-- Aplicar permisos granulares en middleware; hoy el panel usa principalmente `role:admin`.
+- Añadir policies por modelo si en el futuro se requiere autorización por
+  propiedad del registro; actualmente las acciones usan permisos granulares.
 - Evitar consultas completas en memoria en directorios públicos si el volumen crece significativamente.

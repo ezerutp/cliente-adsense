@@ -4,7 +4,8 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 Posts
             </h2>
-            <a
+            @can('posts.create')
+                <a
                 href="{{ route('posts.create') }}"
                 class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 text-gray-900 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                 title="Crear post"
@@ -12,7 +13,8 @@
             >
                 <x-heroicon-o-plus class="h-5 w-[18px]" aria-hidden="true" />
                 <span class="sr-only">Crear post</span>
-            </a>
+                </a>
+            @endcan
         </div>
     </x-slot>
 
@@ -115,7 +117,8 @@
                                     </td>
                                     <td class="px-4 py-4 text-right text-sm font-medium">
                                         <div class="flex justify-end gap-1.5">
-                                            <button
+                                            @can('posts.publish')
+                                                <button
                                                 type="button"
                                                 class="inline-flex size-9 items-center justify-center rounded-md border transition focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 {{ $post->is_vip ? 'text-white' : 'border-gray-300 text-gray-900 hover:bg-gray-50' }}"
                                                 @if ($post->is_vip)
@@ -134,9 +137,9 @@
                                                     <x-heroicon-o-star class="h-5 w-[18px]" aria-hidden="true" />
                                                 @endif
                                                 <span class="sr-only">{{ $post->is_vip ? 'Quitar VIP del post' : 'Marcar post como VIP' }}</span>
-                                            </button>
+                                                </button>
 
-                                            <button
+                                                <button
                                                 type="button"
                                                 class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 text-gray-900 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                                                 title="{{ $post->is_active ? 'Ocultar' : 'Publicar' }}"
@@ -150,9 +153,11 @@
                                                     <x-heroicon-o-eye class="h-5 w-[18px]" aria-hidden="true" />
                                                 @endif
                                                 <span class="sr-only">{{ $post->is_active ? 'Ocultar post' : 'Publicar post' }}</span>
-                                            </button>
+                                                </button>
+                                            @endcan
 
-                                            <a
+                                            @can('posts.edit')
+                                                <a
                                                 href="{{ route('posts.edit', $post) }}"
                                                 class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 text-gray-900 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                                                 title="Editar"
@@ -160,9 +165,11 @@
                                             >
                                                 <x-heroicon-o-pencil-square class="h-5 w-[18px]" aria-hidden="true" />
                                                 <span class="sr-only">Editar post</span>
-                                            </a>
+                                                </a>
+                                            @endcan
 
-                                            <button
+                                            @can('posts.delete')
+                                                <button
                                                 type="button"
                                                 class="inline-flex size-9 items-center justify-center rounded-md border border-gray-300 text-gray-900 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                                                 title="Eliminar"
@@ -172,28 +179,32 @@
                                             >
                                                 <x-heroicon-o-trash class="h-5 w-[18px]" aria-hidden="true" />
                                                 <span class="sr-only">Eliminar post</span>
-                                            </button>
+                                                </button>
+                                            @endcan
                                         </div>
 
-                                        <x-category-action-modal
+                                        @can('posts.publish')
+                                            <x-category-action-modal
                                             name="toggle-vip-post-{{ $post->id }}"
                                             :title="$post->is_vip ? 'Quitar VIP' : 'Marcar VIP'"
                                             :description="$post->is_vip ? 'Este post dejará de mostrarse como VIP.' : 'Este post será marcado como VIP.'"
                                             :action="route('posts.toggle-vip', $post)"
                                             method="PATCH"
                                             :confirm-label="$post->is_vip ? 'Quitar VIP' : 'Marcar VIP'"
-                                        />
+                                            />
 
-                                        <x-category-action-modal
+                                            <x-category-action-modal
                                             name="toggle-post-{{ $post->id }}"
                                             :title="$post->is_active ? 'Ocultar post' : 'Publicar post'"
                                             :description="$post->is_active ? 'Este post dejará de mostrarse públicamente.' : 'Este post volverá a mostrarse públicamente.'"
                                             :action="route('posts.toggle-visibility', $post)"
                                             method="PATCH"
                                             :confirm-label="$post->is_active ? 'Ocultar' : 'Publicar'"
-                                        />
+                                            />
+                                        @endcan
 
-                                        <x-category-action-modal
+                                        @can('posts.delete')
+                                            <x-category-action-modal
                                             name="delete-post-{{ $post->id }}"
                                             title="Eliminar post"
                                             description="Esta acción eliminará el post permanentemente."
@@ -201,7 +212,8 @@
                                             method="DELETE"
                                             confirm-label="Eliminar"
                                             variant="danger"
-                                        />
+                                            />
+                                        @endcan
                                     </td>
                                 </tr>
                             @empty
@@ -210,13 +222,15 @@
                                         <div class="flex flex-col items-center justify-center gap-3">
                                             <x-heroicon-o-rectangle-stack class="h-12 w-12 text-gray-400" />
                                             <p class="text-sm font-medium text-gray-500">No hay posts creados</p>
-                                            <a
+                                            @can('posts.create')
+                                                <a
                                                 href="{{ route('posts.create') }}"
                                                 class="mt-2 inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                             >
                                                 <x-heroicon-o-plus class="h-5 w-5" />
                                                 Crear primer post
-                                            </a>
+                                                </a>
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>

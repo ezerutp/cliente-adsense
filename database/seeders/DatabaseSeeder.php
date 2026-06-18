@@ -39,18 +39,21 @@ class DatabaseSeeder extends Seeder
             'categories.create',
             'categories.edit',
             'categories.delete',
+            'categories.publish',
             
             // Cards
             'cards.view',
             'cards.create',
             'cards.edit',
             'cards.delete',
+            'cards.publish',
             
             // Integraciones
             'integrations.view',
             'integrations.create',
             'integrations.edit',
             'integrations.delete',
+            'integrations.publish',
             
             // Configuración del sitio
             'site-settings.view',
@@ -89,10 +92,12 @@ class DatabaseSeeder extends Seeder
             'categories.create',
             'categories.edit',
             'categories.delete',
+            'categories.publish',
             'cards.view',
             'cards.create',
             'cards.edit',
             'cards.delete',
+            'cards.publish',
             'integrations.view',
         ]);
         

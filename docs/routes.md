@@ -18,13 +18,8 @@ Las rutas dinámicas de categoría se declaran al final para no capturar `/busca
 
 ## Dashboard
 
-Requiere:
-
-```text
-auth
-verified
-role:admin
-```
+Las rutas administrativas requieren `auth`, `verified` y el permiso de la
+acción. El rol admin tiene bypass global; editor y viewer dependen de permisos.
 
 ### Categorías
 
@@ -33,6 +28,9 @@ CRUD bajo `/dashboard/categories` y:
 ```text
 PATCH /dashboard/categories/{category}/toggle-visibility
 ```
+
+Permisos: `categories.view`, `categories.create`, `categories.edit`,
+`categories.delete` y `categories.publish`.
 
 ### Posts
 
@@ -43,13 +41,22 @@ PATCH /dashboard/posts/{post}/toggle-visibility
 PATCH /dashboard/posts/{post}/toggle-vip
 ```
 
+Permisos: `posts.view`, `posts.create`, `posts.edit`, `posts.delete` y
+`posts.publish`.
+
 ### Cards
 
 CRUD de plantillas bajo `/dashboard/post-cards` y toggle de visibilidad.
 
+Permisos: `cards.view`, `cards.create`, `cards.edit`, `cards.delete` y
+`cards.publish`.
+
 ### Integraciones
 
 CRUD bajo `/dashboard/integrations` y toggle de visibilidad.
+
+Permisos: `integrations.view`, `integrations.create`, `integrations.edit`,
+`integrations.delete` y `integrations.publish`.
 
 ### Configuración
 
@@ -60,6 +67,9 @@ POST   /dashboard/settings/locations
 PUT    /dashboard/settings/locations/{location}
 DELETE /dashboard/settings/locations/{location}
 ```
+
+Lectura usa `site-settings.view`; cambios de configuración y ubicaciones usan
+`site-settings.edit`.
 
 ## Perfil
 
