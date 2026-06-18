@@ -5,6 +5,7 @@ use App\Http\Controllers\IntegrationController;
 use App\Http\Controllers\PostCardController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PublicPostBrowseController;
 use App\Http\Controllers\SiteSettingController;
 use App\Models\AgeGateSetting;
 use App\Models\Category;
@@ -146,6 +147,15 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
+Route::get('/u', [PublicPostBrowseController::class, 'locations'])
+    ->name('posts.locations.index');
+Route::get('/u/{location}', [PublicPostBrowseController::class, 'location'])
+    ->name('posts.locations.show');
+Route::get('/t', [PublicPostBrowseController::class, 'tags'])
+    ->name('posts.tags.index');
+Route::get('/t/{tag}', [PublicPostBrowseController::class, 'tag'])
+    ->name('posts.tags.show');
+
 Route::get('/{category:slug}/{post:slug}', function (Category $category, Post $post) {
     abort_unless($category->is_active, 404);
     abort_unless($post->category_id === $category->id && $post->isPubliclyVisible(), 404);
@@ -184,7 +194,7 @@ Route::get('/{category:slug}/{post:slug}', function (Category $category, Post $p
         ->publiclyVisible()
         ->latest('published_at')
         ->latest('created_at')
-        ->limit(4)
+        ->limit(3)
         ->get()
         ->map(function (Post $relatedPost) use ($category, $siteSettings): array {
             $relatedTags = collect($relatedPost->tags ?? [])->map(fn (string $tag): string => mb_strtolower($tag));

@@ -16,6 +16,8 @@ class PublicNavigation
             ['label' => 'Categorías', 'href' => $baseUrl.'#categorias'],
             ['label' => 'Destacados', 'href' => $baseUrl.'#destacados'],
             ['label' => 'Recientes', 'href' => $baseUrl.'#recientes'],
+            ['label' => 'Ubicaciones', 'href' => url('/u')],
+            ['label' => 'Etiquetas', 'href' => url('/t')],
         ];
     }
 }

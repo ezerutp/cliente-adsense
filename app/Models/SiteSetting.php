@@ -103,7 +103,15 @@ class SiteSetting extends Model
     public function inlineCssVariables(): string
     {
         return collect($this->cssVariables())
+            ->filter(fn (?string $value): bool => filled($value))
             ->map(fn (string $value, string $name): string => "{$name}: {$value};")
             ->implode(' ');
+    }
+
+    public function inlineCssVariableBlock(): string
+    {
+        $variables = $this->inlineCssVariables();
+
+        return $variables === '' ? '' : ":root { {$variables} }";
     }
 }

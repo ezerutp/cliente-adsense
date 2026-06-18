@@ -130,9 +130,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            {{ $siteSettings->inlineCssVariables() }}
-        }
+        {!! $siteSettings->inlineCssVariableBlock() !!}
     </style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>

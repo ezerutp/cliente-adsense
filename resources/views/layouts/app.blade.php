@@ -16,9 +16,7 @@
 
         <!-- Scripts -->
         <style>
-            :root {
-                {{ $siteSettings->inlineCssVariables() }}
-            }
+            {!! $siteSettings->inlineCssVariableBlock() !!}
         </style>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>

@@ -1,7 +1,19 @@
 @php
     $navLinks = \App\Support\PublicNavigation::links(url('/'));
 
-    $gallery = collect($post->gallery_image_urls ?? [])->filter()->values();
+    $fallbackCoverImage = 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1200&q=80';
+    $splitImageUrls = static fn ($values) => collect(is_array($values) ? $values : [$values])
+        ->flatMap(fn ($value) => preg_split('/\R/u', (string) $value) ?: [])
+        ->map(fn (string $url): string => trim($url))
+        ->filter()
+        ->values();
+    $coverImages = $splitImageUrls($post->cover_image_url);
+    $coverImage = $coverImages->first() ?: $fallbackCoverImage;
+    $gallery = $coverImages
+        ->slice(1)
+        ->merge($splitImageUrls($post->gallery_image_urls ?? []))
+        ->values();
+    $galleryImages = collect([$coverImage])->merge($gallery)->values();
     $contactButtons = collect($contactButtons ?? []);
     $postCards = collect($postCards ?? []);
     $loginHref = \Illuminate\Support\Facades\Route::has('login') ? route('login') : '#';
@@ -42,9 +54,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            {{ $siteSettings->inlineCssVariables() }}
-        }
+        {!! $siteSettings->inlineCssVariableBlock() !!}
     </style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -63,11 +73,19 @@
         <article class="lg:col-span-3">
             <div class="overflow-hidden rounded-3xl border border-[#E5E7EB] bg-white shadow-sm">
                 <div class="relative aspect-[16/9] overflow-hidden bg-[#F3F4F6]">
-                    <img
-                        src="{{ $post->cover_image_url ?: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1200&q=80' }}"
-                        alt="{{ $post->title }}"
-                        class="h-full w-full object-cover"
+                    <button
+                        type="button"
+                        class="group block h-full w-full cursor-zoom-in focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-[#E91E63]"
+                        x-data
+                        x-on:click="$dispatch('open-post-gallery', { index: 0 })"
+                        aria-label="Ampliar imagen de portada de {{ $post->title }}"
                     >
+                        <img
+                            src="{{ $coverImage }}"
+                            alt="{{ $post->title }}"
+                            class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                        >
+                    </button>
 
                     <div class="absolute left-4 top-4 flex flex-wrap gap-2">
                         @if ($tags->contains('verificado'))
@@ -92,10 +110,14 @@
                         </div>
 
                         @if ($post->location)
-                            <div class="inline-flex items-center gap-2 self-start rounded-full bg-[#F3F4F6] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.08em] text-[#374151] sm:justify-end">
+                            <a
+                                href="{{ route('posts.locations.show', ['location' => \Illuminate\Support\Str::slug($post->location)]) }}"
+                                class="inline-flex cursor-pointer items-center gap-2 self-start rounded-full bg-[#F3F4F6] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.08em] text-[#374151] transition hover:bg-[#E91E63]/10 hover:text-[#E91E63] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E91E63] focus-visible:ring-offset-2 sm:justify-end"
+                                aria-label="Ver posts en {{ $post->location }}"
+                            >
                                 <x-heroicon-o-map-pin class="size-4 text-[#E91E63]" aria-hidden="true" />
                                 <span>{{ $post->location }}</span>
-                            </div>
+                            </a>
                         @endif
                     </div>
 
@@ -108,7 +130,12 @@
                     @if ($post->tags)
                         <div class="mt-6 flex flex-wrap gap-2">
                             @foreach ($post->tags as $tag)
-                                <span class="rounded-full bg-[#F3F4F6] px-3 py-1 text-xs font-semibold text-[#374151]">{{ $tag }}</span>
+                                <a
+                                    href="{{ route('posts.tags.show', ['tag' => \Illuminate\Support\Str::slug($tag)]) }}"
+                                    class="rounded-full bg-[#F3F4F6] px-3 py-1 text-xs font-semibold text-[#374151] transition hover:bg-[#E91E63]/10 hover:text-[#E91E63]"
+                                >
+                                    #{{ $tag }}
+                                </a>
                             @endforeach
                         </div>
                     @endif
@@ -122,7 +149,20 @@
                             <h2 class="text-xl font-bold text-[#222222]">Galería</h2>
                             <div class="mt-4 grid gap-4 sm:grid-cols-2">
                                 @foreach ($gallery as $image)
-                                    <img src="{{ $image }}" alt="{{ $post->title }}" class="aspect-[4/3] w-full rounded-2xl object-cover" loading="lazy">
+                                    <button
+                                        type="button"
+                                        class="group cursor-zoom-in overflow-hidden rounded-2xl focus:outline-none focus-visible:ring-4 focus-visible:ring-[#E91E63] focus-visible:ring-offset-2"
+                                        x-data
+                                        x-on:click="$dispatch('open-post-gallery', { index: {{ $loop->index + 1 }} })"
+                                        aria-label="Ampliar imagen {{ $loop->iteration }} de la galería de {{ $post->title }}"
+                                    >
+                                        <img
+                                            src="{{ $image }}"
+                                            alt="{{ $post->title }}"
+                                            class="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                                            loading="lazy"
+                                        >
+                                    </button>
                                 @endforeach
                             </div>
                         </section>
@@ -215,6 +255,7 @@
         :legal-links="$legalLinks"
     />
 
+    <x-post-image-gallery :images="$galleryImages" :title="$post->title" />
     <x-age-confirmation-modal :content="$ageGate" />
 </body>
 </html>
