@@ -36,8 +36,11 @@ class SiteSettingController extends Controller
         $settings->update($data['site']);
         $ageGateSettings->update($data['age_gate']);
 
-        return redirect()
-            ->route('settings.edit')
+        $section = in_array($request->input('settings_section'), ['cover', 'colors', 'server', 'age'], true)
+            ? $request->input('settings_section')
+            : 'cover';
+
+        return redirect(route('settings.edit').'#'.$section)
             ->with('status', 'Configuración actualizada correctamente.');
     }
 

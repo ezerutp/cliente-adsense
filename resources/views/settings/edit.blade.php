@@ -7,8 +7,52 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="mx-auto max-w-4xl sm:px-6 lg:px-8">
+    @php
+        $locationErrorFields = ['name', 'department', 'sort_order'];
+        $colorErrorFields = [
+            'primary_color',
+            'primary_hover_color',
+            'text_color',
+            'muted_color',
+            'background_color',
+            'admin_ink_color',
+            'admin_ink_hover_color',
+            'admin_muted_color',
+            'admin_danger_color',
+            'admin_focus_color',
+        ];
+        $serverErrorFields = ['server_country', 'server_country_code', 'server_utc_offset'];
+        $ageGateErrorFields = [
+            'age_gate_storage_key',
+            'age_gate_badge',
+            'age_gate_title',
+            'age_gate_description',
+            'age_gate_confirm_label',
+            'age_gate_exit_label',
+            'age_gate_exit_href',
+            'age_gate_legal_text',
+        ];
+        $initialSection = request()->has('locations_page') || collect($locationErrorFields)->contains(fn ($field) => $errors->has($field))
+            ? 'locations'
+            : (collect($colorErrorFields)->contains(fn ($field) => $errors->has($field))
+                ? 'colors'
+                : (collect($serverErrorFields)->contains(fn ($field) => $errors->has($field))
+                    ? 'server'
+                    : (collect($ageGateErrorFields)->contains(fn ($field) => $errors->has($field)) ? 'age' : 'cover')));
+    @endphp
+
+    <div
+        class="py-12"
+        x-data="{ section: @js($initialSection) }"
+        x-init="
+            const hashSection = window.location.hash.replace('#', '');
+            if (['cover', 'colors', 'server', 'age', 'locations'].includes(hashSection)) {
+                section = hashSection;
+            }
+            $watch('section', value => history.replaceState(null, '', `#${value}`));
+        "
+    >
+        <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             @if (session('status'))
                 <div class="mb-6 rounded-md bg-green-50 p-4 text-sm font-medium text-green-800">
                     {{ session('status') }}
@@ -20,12 +64,54 @@
                 </div>
             @endif
 
-            <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
+            <div class="grid items-start gap-6 lg:grid-cols-4">
+                <aside class="overflow-hidden bg-white shadow-sm sm:rounded-lg lg:sticky lg:top-6">
+                    <div class="border-b border-gray-200 p-5">
+                        <h3 class="font-semibold text-gray-900">Secciones</h3>
+                        <p class="mt-1 text-sm text-gray-500">Elige qué deseas configurar.</p>
+                    </div>
+
+                    <nav class="grid gap-1 p-3 sm:grid-cols-2 lg:grid-cols-1" aria-label="Secciones de configuración">
+                        @foreach ([
+                            'cover' => ['Portada', 'Título, subtítulo e imagen'],
+                            'colors' => ['Colores', 'Paleta pública y administrativa'],
+                            'server' => ['Servidor', 'País, código y zona horaria'],
+                            'age' => ['Confirmación de edad', 'Contenido y botones del modal'],
+                            'locations' => ['Ubicaciones', 'Distritos disponibles en posts'],
+                        ] as $sectionKey => [$sectionLabel, $sectionDescription])
+                            <button
+                                type="button"
+                                x-on:click="section = '{{ $sectionKey }}'"
+                                class="rounded-lg px-4 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                                x-bind:class="section === '{{ $sectionKey }}'
+                                    ? 'bg-gray-900 text-white shadow-sm'
+                                    : 'text-gray-700 hover:bg-gray-100'"
+                                x-bind:aria-current="section === '{{ $sectionKey }}' ? 'page' : null"
+                            >
+                                <span class="block text-sm font-semibold">{{ $sectionLabel }}</span>
+                                <span
+                                    class="mt-1 block text-xs"
+                                    x-bind:class="section === '{{ $sectionKey }}' ? 'text-gray-300' : 'text-gray-500'"
+                                >
+                                    {{ $sectionDescription }}
+                                </span>
+                            </button>
+                        @endforeach
+                    </nav>
+                </aside>
+
+                <div class="min-w-0 lg:col-span-3">
+            <div
+                x-show="section !== 'locations'"
+                x-cloak
+                class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
+            >
                 <form method="POST" action="{{ route('settings.update') }}" class="space-y-8 p-6">
                     @csrf
                     @method('PUT')
+                    <input type="hidden" name="settings_section" x-model="section">
 
-                    <section class="space-y-6">
+                    <section x-show="section === 'cover'" x-cloak class="space-y-6">
                         <div>
                             <h3 class="text-base font-semibold text-gray-900">Portada</h3>
                         </div>
@@ -69,7 +155,7 @@
                         </div>
                     </section>
 
-                    <section class="space-y-6 border-t border-gray-200 pt-8">
+                    <section x-show="section === 'colors'" x-cloak class="space-y-6">
                         <div>
                             <h3 class="text-base font-semibold text-gray-900">Colores globales</h3>
                         </div>
@@ -112,7 +198,9 @@
                     </section>
 
                     <section
-                        class="space-y-6 border-t border-gray-200 pt-8"
+                        x-show="section === 'server'"
+                        x-cloak
+                        class="space-y-6"
                         x-data="{
                             countries: @js($serverCountries),
                             country: @js(old('server_country', $settings->server_country)),
@@ -185,7 +273,7 @@
                         </div>
                     </section>
 
-                    <section class="space-y-6 border-t border-gray-200 pt-8">
+                    <section x-show="section === 'age'" x-cloak class="space-y-6">
                         <div>
                             <h3 class="text-base font-semibold text-gray-900">Modal de confirmación de edad</h3>
                         </div>
@@ -316,7 +404,12 @@
                 </form>
             </div>
 
-            <section id="locations" class="mt-8 scroll-mt-24 overflow-hidden bg-white shadow-sm sm:rounded-lg">
+            <section
+                id="locations"
+                x-show="section === 'locations'"
+                x-cloak
+                class="scroll-mt-24 overflow-hidden bg-white shadow-sm sm:rounded-lg"
+            >
                 <div class="border-b border-gray-200 p-6">
                     <h3 class="text-lg font-semibold text-gray-900">Ubicaciones distritales</h3>
                     <p class="mt-2 text-sm text-gray-600">
@@ -454,6 +547,8 @@
                     </div>
                 @endif
             </section>
+                </div>
+            </div>
         </div>
     </div>
 </x-app-layout>
