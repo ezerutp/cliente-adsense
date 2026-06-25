@@ -48,6 +48,12 @@ class DemoContentSeederTest extends TestCase
                 ->count(),
         );
         $this->assertSame(
+            3,
+            Post::query()
+                ->where('card_type', Post::CARD_TYPE_BANNER)
+                ->count(),
+        );
+        $this->assertSame(
             60,
             PostCard::query()
                 ->whereNotNull('post_id')

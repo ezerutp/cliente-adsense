@@ -50,6 +50,7 @@ class PublicPostSearchController extends Controller
                         ->orWhere('tags', 'like', $like);
                 });
             })
+            ->orderByRaw("CASE WHEN card_type = 'banner' THEN 0 ELSE 1 END")
             ->latest('published_at')
             ->latest('created_at');
 
@@ -85,6 +86,7 @@ class PublicPostSearchController extends Controller
 
         return [
             'id' => 'post-'.$post->id,
+            'cardType' => $post->card_type ?? Post::CARD_TYPE_POST,
             'title' => $post->title,
             'subtitle' => $post->subtitle,
             'city' => $post->location ?: $siteSettings->server_country,

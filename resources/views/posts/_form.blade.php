@@ -39,7 +39,7 @@
             ])->values()->all(),
         ])->values()->all() ?? []);
     $postSectionFields = [
-        'basic' => ['category_id', 'title', 'subtitle', 'location'],
+        'basic' => ['category_id', 'card_type', 'title', 'subtitle', 'location'],
         'content' => ['body'],
         'media' => ['cover_image_url', 'cover_image_file', 'gallery_image_urls', 'gallery_image_files'],
         'contact' => ['whatsapp_country_code', 'whatsapp_number', 'telegram_username', 'sms_country_code', 'sms_number', 'tags'],
@@ -273,22 +273,38 @@
                     <p class="mt-1 text-sm text-gray-600">Define cómo se identificará y dónde aparecerá el anuncio.</p>
                 </div>
 
-    <div>
-        <x-input-label for="category_id" value="Categoría" />
-        <select
-            id="category_id"
-            name="category_id"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            required
-        >
-            <option value="">Selecciona una categoría</option>
-            @foreach ($categories as $category)
-                <option value="{{ $category->id }}" @selected((int) old('category_id', $post?->category_id) === $category->id)>
-                    {{ $category->name }}
-                </option>
-            @endforeach
-        </select>
-        <x-input-error class="mt-2" :messages="$errors->get('category_id')" />
+    <div class="grid gap-6 sm:grid-cols-2">
+        <div>
+            <x-input-label for="category_id" value="Categoría" />
+            <select
+                id="category_id"
+                name="category_id"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                required
+            >
+                <option value="">Selecciona una categoría</option>
+                @foreach ($categories as $category)
+                    <option value="{{ $category->id }}" @selected((int) old('category_id', $post?->category_id) === $category->id)>
+                        {{ $category->name }}
+                    </option>
+                @endforeach
+            </select>
+            <x-input-error class="mt-2" :messages="$errors->get('category_id')" />
+        </div>
+
+        <div>
+            <x-input-label for="card_type" value="Tipo de card" />
+            <select
+                id="card_type"
+                name="card_type"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                required
+            >
+                <option value="post" @selected(old('card_type', $post?->card_type ?? 'post') === 'post')>Post normal</option>
+                <option value="banner" @selected(old('card_type', $post?->card_type ?? 'post') === 'banner')>Banner</option>
+            </select>
+            <x-input-error class="mt-2" :messages="$errors->get('card_type')" />
+        </div>
     </div>
 
     <div class="grid gap-6 sm:grid-cols-2">

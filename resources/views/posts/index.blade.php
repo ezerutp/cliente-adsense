@@ -59,6 +59,11 @@
                                             </div>
                                             <div class="min-w-0 flex-1 overflow-hidden">
                                                 <div class="truncate font-medium text-gray-900">{{ Str::limit($post->title, 32) }}</div>
+                                                @if ($post->isBannerCard())
+                                                    <span class="mt-1 inline-flex rounded-full bg-pink-100 px-2 py-0.5 text-[11px] font-semibold text-pink-800">
+                                                        Banner
+                                                    </span>
+                                                @endif
                                                 @if ($post->subtitle)
                                                     <div class="mt-1 truncate text-sm text-gray-500">{{ Str::limit($post->subtitle, 64) }}</div>
                                                 @endif

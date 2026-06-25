@@ -57,6 +57,36 @@ class PublicPostRelatedPostsTest extends TestCase
         });
     }
 
+    public function test_it_excludes_banner_posts_from_related_posts(): void
+    {
+        $category = Category::query()->create([
+            'name' => 'Categoría',
+            'slug' => 'categoria',
+            'is_active' => true,
+        ]);
+
+        $currentPost = $this->createPost($category, 'Post actual', 'post-actual');
+        $this->createPost($category, 'Banner relacionado', 'banner-relacionado', [
+            'card_type' => Post::CARD_TYPE_BANNER,
+            'published_at' => now(),
+        ]);
+        $this->createPost($category, 'Relacionado normal', 'relacionado-normal', [
+            'published_at' => now()->subMinute(),
+        ]);
+
+        $this->get(route('posts.public.show', [
+            'category' => $category,
+            'post' => $currentPost,
+        ]))
+            ->assertOk()
+            ->assertViewHas('relatedPosts', function ($relatedPosts): bool {
+                $titles = $relatedPosts->pluck('title');
+
+                return $titles->contains('Relacionado normal')
+                    && ! $titles->contains('Banner relacionado');
+            });
+    }
+
     /**
      * @param array<string, mixed> $attributes
      */

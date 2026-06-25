@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 #[Fillable([
     'category_id',
+    'card_type',
     'title',
     'slug',
     'subtitle',
@@ -37,6 +38,12 @@ class Post extends Model
     use HasFactory;
 
     public const PUBLIC_PER_PAGE = 20;
+    public const CARD_TYPE_POST = 'post';
+    public const CARD_TYPE_BANNER = 'banner';
+    public const CARD_TYPES = [
+        self::CARD_TYPE_POST,
+        self::CARD_TYPE_BANNER,
+    ];
 
     /**
      * Get the attributes that should be cast.
@@ -94,5 +101,15 @@ class Post extends Model
             ->where(fn (Builder $query) => $query
                 ->whereNull('ends_at')
                 ->orWhere('ends_at', '>', now()));
+    }
+
+    public function scopeStandardCard(Builder $query): Builder
+    {
+        return $query->where('card_type', self::CARD_TYPE_POST);
+    }
+
+    public function isBannerCard(): bool
+    {
+        return $this->card_type === self::CARD_TYPE_BANNER;
     }
 }

@@ -104,4 +104,55 @@ class PublicPostBrowseTest extends TestCase
                     && $posts->count() === 1);
         }
     }
+
+    public function test_banner_posts_render_first_and_span_the_public_listing_grid(): void
+    {
+        $category = Category::query()->create([
+            'name' => 'Categoría banners',
+            'slug' => 'categoria-banners',
+            'is_active' => true,
+        ]);
+
+        Post::query()->create([
+            'category_id' => $category->id,
+            'card_type' => Post::CARD_TYPE_POST,
+            'title' => 'Normal reciente',
+            'slug' => 'normal-reciente',
+            'body' => 'Contenido',
+            'location' => 'Lima',
+            'tags' => ['Promoción'],
+            'is_active' => true,
+            'published_at' => now(),
+        ]);
+
+        Post::query()->create([
+            'category_id' => $category->id,
+            'card_type' => Post::CARD_TYPE_BANNER,
+            'title' => 'Banner antiguo',
+            'slug' => 'banner-antiguo',
+            'body' => 'Contenido',
+            'location' => 'Lima',
+            'tags' => ['Promoción'],
+            'is_active' => true,
+            'published_at' => now()->subDay(),
+        ]);
+
+        foreach ([
+            route('categories.public.show', ['category' => $category]),
+            route('posts.locations.show', ['location' => 'lima']),
+            route('posts.tags.show', ['tag' => 'promocion']),
+        ] as $url) {
+            $this->get($url)
+                ->assertOk()
+                ->assertSee('classic-listing-banner-card', false)
+                ->assertViewHas('posts', function ($posts): bool {
+                    $items = collect($posts->items());
+
+                    $this->assertSame('Banner antiguo', $items->first()['title']);
+                    $this->assertSame(Post::CARD_TYPE_BANNER, $items->first()['cardType']);
+
+                    return true;
+                });
+        }
+    }
 }

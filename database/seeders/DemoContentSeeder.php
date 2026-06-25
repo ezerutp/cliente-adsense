@@ -39,7 +39,7 @@ class DemoContentSeeder extends Seeder
             $this->seedPosts($categories, $templates);
         });
 
-        $this->command?->info('✓ Contenido demo: 2 integraciones, 2 cards, 3 categorías y 30 posts.');
+        $this->command?->info('✓ Contenido demo: 2 integraciones, 2 cards, 3 categorías y 30 posts con variantes de banner.');
     }
 
     private function seedIntegrations(): void
@@ -179,8 +179,9 @@ class DemoContentSeeder extends Seeder
                     ['slug' => $slug],
                     [
                         'category_id' => $category->id,
+                        'card_type' => $postNumber === 1 ? Post::CARD_TYPE_BANNER : Post::CARD_TYPE_POST,
                         'title' => $category->name.' en '.$location.' #'.$postNumber,
-                        'subtitle' => 'Atención coordinada, ambiente agradable y disponibilidad flexible.',
+                        'subtitle' => $this->subtitleFor($postNumber),
                         'location' => $location,
                         'body' => "Conoce este perfil de {$category->name} disponible en {$location}.\n\nContacta directamente para consultar horarios, condiciones y disponibilidad.",
                         'cover_image_url' => self::IMAGES[$coverIndex],
@@ -230,6 +231,16 @@ class DemoContentSeeder extends Seeder
         }
 
         return $tags;
+    }
+
+    private function subtitleFor(int $postNumber): string
+    {
+        return match ($postNumber % 4) {
+            1 => 'Atención premium destacada para aparecer primero en listados.',
+            2 => 'Atención coordinada, ambiente agradable y disponibilidad flexible.',
+            3 => 'Perfil verificado con agenda activa y trato reservado.',
+            default => 'Disponibilidad por horarios, zonas céntricas y contacto directo.',
+        };
     }
 
     /**

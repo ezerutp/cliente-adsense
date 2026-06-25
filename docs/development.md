@@ -99,7 +99,7 @@ Este comando elimina todos los datos. No debe ejecutarse sobre producción.
 
 ```text
 admin@test.com
-Vidarte;123
+admin1234
 ```
 
 Cambiar o eliminar en ambientes compartidos.

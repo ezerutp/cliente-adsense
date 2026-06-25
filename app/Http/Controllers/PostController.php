@@ -209,6 +209,7 @@ class PostController extends Controller
     /**
      * @return array{
      *     category_id: int,
+     *     card_type: string,
      *     title: string,
      *     slug?: string|null,
      *     subtitle?: string|null,
@@ -226,6 +227,7 @@ class PostController extends Controller
     {
         $data = $request->validate([
             'category_id' => ['required', 'integer', Rule::exists('categories', 'id')],
+            'card_type' => ['required', Rule::in(Post::CARD_TYPES)],
             'title' => ['required', 'string', 'max:255'],
             'subtitle' => ['nullable', 'string', 'max:255'],
             'location' => ['required', 'string', 'max:255', Rule::exists('locations', 'name')],

@@ -7,6 +7,17 @@
             <span class="sr-only">{{ $siteSettings->brand_primary_text }} {{ $siteSettings->brand_accent_text }} {{ $siteSettings->brandInitials() }}</span>
         </a>
 
+        <nav class="classic-desktop-nav" aria-label="Navegación principal">
+            <a href="{{ url('/') }}">Inicio</a>
+            <a href="{{ route('posts.locations.index') }}">Ubicaciones</a>
+            <a href="{{ route('posts.tags.index') }}">Etiquetas</a>
+            @auth
+                <a href="{{ route('dashboard') }}">Panel</a>
+            @else
+                <a href="{{ route('login') }}">Ingresar</a>
+            @endauth
+        </nav>
+
         <div class="ml-auto flex items-center gap-2">
             <a href="{{ route('posts.search') }}" class="classic-header-icon" aria-label="Buscar anuncios">
                 <x-heroicon-o-magnifying-glass class="size-4" />

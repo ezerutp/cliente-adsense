@@ -49,11 +49,11 @@
                             <x-heroicon-o-magnifying-glass class="size-5" />
                         </button>
                     </form>
-                </div>
 
-                <div class="classic-home-heading">
-                    <h2>Encuentros calientes en tu ciudad</h2>
-                    <p>Anuncios clasificados para adultos</p>
+                    <div class="classic-home-heading">
+                        <h2>Encuentros calientes cerca de ti</h2>
+                        <p>Anuncios clasificados para adultos por ciudad y categoría</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -83,11 +83,7 @@
             <section class="classic-featured-strip">
                 <div class="classic-shell">
                     <div class="classic-strip-title">Servicios destacados</div>
-                    <div class="classic-featured-scroll">
-                        @foreach ($premiumListings->take(8) as $listing)
-                            <x-listing-card :listing="$listing" />
-                        @endforeach
-                    </div>
+                    <x-listing-cards-marquee :listings="$premiumListings->take(8)->values()->all()" />
                 </div>
             </section>
         @endif

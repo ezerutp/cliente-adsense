@@ -68,7 +68,7 @@
                 <h3>{{ $group['title'] }}</h3>
                 <div>
                     @foreach ($group['locations'] as $location)
-                        <a href="{{ route('posts.search', ['location' => \Illuminate\Support\Str::slug($location)]) }}">
+                        <a href="{{ route('posts.locations.show', ['location' => \Illuminate\Support\Str::slug($location)]) }}">
                             {{ $location }}
                         </a>
                     @endforeach

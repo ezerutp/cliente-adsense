@@ -48,6 +48,7 @@ Route::get('/', function () {
             ->with('category')
             ->whereHas('category', fn ($query) => $query->where('is_active', true))
             ->publiclyVisible()
+            ->standardCard()
             ->where('is_vip', true)
             ->latest('published_at')
             ->latest('created_at')
@@ -58,6 +59,7 @@ Route::get('/', function () {
 
                 return [
                     'id' => 'post-'.$post->id,
+                    'cardType' => $post->card_type ?? Post::CARD_TYPE_POST,
                     'title' => $post->title,
                     'subtitle' => $post->subtitle,
                     'city' => $siteSettings->server_country,
@@ -78,6 +80,7 @@ Route::get('/', function () {
             ->with('category')
             ->whereHas('category', fn ($query) => $query->where('is_active', true))
             ->publiclyVisible()
+            ->standardCard()
             ->latest('published_at')
             ->latest('created_at')
             ->get()
@@ -304,6 +307,7 @@ Route::get('/{category:slug}/{post:slug}', function (Category $category, Post $p
         ->whereBelongsTo($category)
         ->whereKeyNot($post->getKey())
         ->publiclyVisible()
+        ->standardCard()
         ->latest('published_at')
         ->latest('created_at')
         ->limit(3)
@@ -338,6 +342,7 @@ Route::get('/{category:slug}', function (Category $category) {
     $posts = Post::query()
         ->whereBelongsTo($category)
         ->publiclyVisible()
+        ->orderByRaw("CASE WHEN card_type = 'banner' THEN 0 ELSE 1 END")
         ->latest('published_at')
         ->paginate(Post::PUBLIC_PER_PAGE)
         ->withQueryString()
@@ -346,6 +351,7 @@ Route::get('/{category:slug}', function (Category $category) {
 
             return [
                 'id' => 'post-'.$post->id,
+                'cardType' => $post->card_type ?? Post::CARD_TYPE_POST,
                 'title' => $post->title,
                 'subtitle' => $post->subtitle,
                 'city' => $siteSettings->server_country,

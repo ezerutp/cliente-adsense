@@ -73,7 +73,7 @@ final y responde `403` ante accesos manuales no autorizados.
 
 ```text
 admin@test.com
-Vidarte;123
+admin1234
 ```
 
 Nunca usar estas credenciales en producción.
