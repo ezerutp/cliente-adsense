@@ -9,81 +9,76 @@ class LocationSeeder extends Seeder
 {
     public function run(): void
     {
-        $locations = [
-            'Amazonas' => ['Chachapoyas'],
-            'Áncash' => ['Chimbote', 'Huaraz', 'Nuevo Chimbote'],
-            'Arequipa' => ['Alto Selva Alegre', 'Arequipa', 'Cayma', 'Cerro Colorado', 'José Luis Bustamante y Rivero', 'Miraflores', 'Paucarpata', 'Sachaca', 'Yanahuara'],
-            'Ayacucho' => ['Ayacucho'],
-            'Cajamarca' => ['Cajamarca', 'Jaén'],
-            'Callao' => ['Bellavista', 'Callao', 'Carmen de la Legua Reynoso', 'La Perla', 'La Punta', 'Mi Perú', 'Ventanilla'],
-            'Cusco' => ['Cusco', 'San Jerónimo', 'San Sebastián', 'Santiago', 'Wanchaq'],
-            'Huancavelica' => ['Huancavelica'],
-            'Huánuco' => ['Amarilis', 'Huánuco', 'Pillco Marca'],
-            'Ica' => ['Chincha Alta', 'Ica', 'Pisco'],
-            'Junín' => ['Chilca', 'El Tambo', 'Huancayo'],
-            'La Libertad' => ['El Porvenir', 'Florencia de Mora', 'Huanchaco', 'La Esperanza', 'Trujillo', 'Víctor Larco Herrera'],
-            'Lambayeque' => ['Chiclayo', 'José Leonardo Ortiz', 'La Victoria', 'Lambayeque'],
-            'Lima' => [
-                'Ancón',
-                'Ate',
-                'Barranco',
-                'Breña',
-                'Carabayllo',
-                'Chaclacayo',
-                'Chorrillos',
-                'Cieneguilla',
-                'Comas',
-                'El Agustino',
-                'Independencia',
-                'Jesús María',
-                'La Molina',
-                'La Victoria',
-                'Lima',
-                'Lince',
-                'Los Olivos',
-                'Lurín',
-                'Magdalena del Mar',
-                'Miraflores',
-                'Pachacámac',
-                'Pueblo Libre',
-                'Puente Piedra',
-                'Rímac',
-                'San Borja',
-                'San Isidro',
-                'San Juan de Lurigancho',
-                'San Juan de Miraflores',
-                'San Luis',
-                'San Martín de Porres',
-                'San Miguel',
-                'Santa Anita',
-                'Santiago de Surco',
-                'Surquillo',
-                'Villa El Salvador',
-                'Villa María del Triunfo',
+        $locationsByDepartment = [
+            'Perú' => [
+                'Abancay', 'Acobamba', 'Acomayo', 'Aguaytía', 'Ambo', 'Andahuaylas',
+                'Anta', 'Aplao', 'Arequipa', 'Ascope', 'Atalaya', 'Ayabaca',
+                'Ayacucho', 'Ayaviri', 'Azángaro', 'Bagua', 'Bagua Grande', 'Bambamarca',
+                'Bellavista SM', 'Cajabamba', 'Cajamarca', 'Calca', 'Camaná', 'Cangallo',
+                'Caravelí', 'Caraz', 'Carhuaz', 'Casma', 'Catacaos', 'Celendín',
+                'Cerro de Pasco', 'Chachapoyas', 'Chalhuanca', 'Chepén', 'Chiclayo', 'Chimbote',
+                'Chincha', 'Chincheros', 'Chiquián', 'Chivay', 'Chota', 'Chulucanas',
+                'Chupaca', 'Chuquibamba', 'Churcampa', 'Concepción', 'Contamana', 'Contumazá',
+                'Coracora', 'Cotahuasi', 'Cusco', 'Cutervo', 'Ferreñafe', 'Huamachuco',
+                'Huancabamba', 'Huancapi', 'Huancavelica', 'Huancayo', 'Huanchaco', 'Huanta',
+                'Huánuco', 'Huaraz', 'Huari', 'Huaral', 'Ica', 'Ilave',
+                'Ilo', 'Iquitos', 'Jaén', 'Jauja', 'Juanjuí', 'Juli',
+                'Juliaca', 'Jumbilla', 'Junín', 'La Merced', 'La Oroya', 'Lamas',
+                'Lambayeque', 'Lámud', 'Lircay', 'Mendoza', 'Mollendo', 'Moquegua',
+                'Moyobamba', 'Nauta', 'Nazca', 'Otuzco', 'Oxapampa', 'Pacasmayo',
+                'Paita', 'Pallasca', 'Pampas', 'Paruro', 'Paucartambo', 'Picota',
+                'Pichari', 'Pisco', 'Piscobamba', 'Piura', 'Pomabamba', 'Pucallpa',
+                'Puerto Maldonado', 'Puno', 'Puquio', 'Quillabamba', 'Recuay', 'Requena',
+                'Rioja', 'San Ignacio', 'San Marcos', 'San Miguel Ay', 'San P. de Lloc', 'San Pablo',
+                'San Ramón', 'Santa Cruz', 'Santa María N', 'Santiago de Chuco', 'Santo Tomás', 'Satipo',
+                'Sechura', 'Sicuani', 'Sihuas', 'Sullana', 'Tacna', 'Talara',
+                'Tarapoto', 'Tarma', 'Tayabamba', 'Tingo María', 'Tocache', 'Trujillo',
+                'Tumbes', 'Urcos', 'Urubamba', 'Vilcashuamán', 'Virú', 'Yanaoca',
+                'Yauri', 'Yauyos', 'Yungay', 'Yurimaguas', 'Zarumilla', 'Zorritos',
             ],
-            'Loreto' => ['Belén', 'Iquitos', 'Punchana', 'San Juan Bautista'],
-            'Madre de Dios' => ['Tambopata'],
-            'Moquegua' => ['Ilo', 'Moquegua'],
-            'Pasco' => ['Chaupimarca'],
-            'Piura' => ['Castilla', 'Catacaos', 'Piura', 'Sullana', 'Veintiséis de Octubre'],
-            'Puno' => ['Juliaca', 'Puno'],
-            'San Martín' => ['Moyobamba', 'Tarapoto'],
-            'Tacna' => ['Alto de la Alianza', 'Ciudad Nueva', 'Gregorio Albarracín Lanchipa', 'Pocollay', 'Tacna'],
-            'Tumbes' => ['Tumbes'],
-            'Ucayali' => ['Callería', 'Manantay', 'Yarinacocha'],
+            'Lima Metropolitana' => [
+                'Ate', 'Av. Izaguirre', 'Av. Arequipa', 'Barranco', 'Bellavista', 'Breña',
+                'Callao', 'Carabayllo', 'Carmen de la Legua', 'Cercado', 'Chaclacayo', 'Chorrillos',
+                'Chosica', 'Cieneguilla', 'Ciudad de Dios', 'Colombianas', 'Comas', 'El Agustino',
+                'Fiori', 'Huachipa', 'Independencia', 'Jesús María', 'La Molina', 'La Perla',
+                'La Punta', 'La Victoria', 'Lince', 'Los Olivos', 'Lurín', 'Magdalena',
+                'Mall del Sur', 'Mega Plaza', 'Mi Perú', 'Miraflores', 'Pachacámac', 'Plaza Norte',
+                'Pucusana', 'Pueblo Libre', 'Puente Piedra', 'Punta Hermosa', 'Punta Negra', 'Rímac',
+                'San Bartolo', 'San Borja', 'San Isidro', 'San Juan de Lurigancho', 'San Juan de Miraflores', 'San Luis',
+                'San Martín', 'San Miguel', 'Santa Anita', 'Santa María', 'Santa Rosa', 'Surco',
+                'Surquillo', 'Venezolanas', 'Ventanilla', 'Villa El Salvador', 'Villa María del Triunfo', 'Zárate',
+            ],
+            'Lima Provincias' => [
+                'Ancón', 'Arahuay', 'Asia', 'Aucallama', 'Barranca', 'Cajatambo',
+                'Calango', 'Cañete', 'Canta', 'Cerro Azul', 'Chancay', 'Chicla',
+                'Chilca', 'Churín', 'Cochamarca', 'Huacho', 'Huamantanga', 'Huaral',
+                'Huaura', 'Imperial', 'Lunahuaná', 'Mala', 'Manás', 'Matucana',
+                'Naván', 'Nuevo Imperial', 'Oyón', 'Paramonga', 'Pativilca', 'Quilmaná',
+                'San Mateo', 'Santa Eulalia', 'Santa Rosa de Quives', 'Sayán', 'Supe', 'Végueta',
+            ],
         ];
 
-        $sortOrder = 0;
+        Location::query()->delete();
 
-        foreach ($locations as $department => $districts) {
-            foreach ($districts as $district) {
-                Location::query()->updateOrCreate(
-                    ['name' => $district],
-                    [
-                        'department' => $department,
-                        'sort_order' => $sortOrder++,
-                    ],
-                );
+        $sortOrder = 0;
+        $seen = [];
+
+        foreach ($locationsByDepartment as $department => $locations) {
+            foreach ($locations as $location) {
+                $name = trim($location);
+                $key = mb_strtolower($name);
+
+                if ($name === '' || isset($seen[$key])) {
+                    continue;
+                }
+
+                $seen[$key] = true;
+
+                Location::query()->create([
+                    'name' => $name,
+                    'department' => $department,
+                    'sort_order' => $sortOrder++,
+                ]);
             }
         }
     }

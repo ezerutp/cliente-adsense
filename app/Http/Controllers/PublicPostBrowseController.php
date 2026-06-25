@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AgeGateSetting;
+use App\Models\Location;
 use App\Models\Post;
 use App\Models\SiteSetting;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -96,6 +97,17 @@ class PublicPostBrowseController extends Controller
 
     private function postsView(string $type, string $slug, string $eyebrow, string $emptyMessage): View
     {
+        $label = null;
+
+        if ($type === 'location') {
+            $label = Location::query()
+                ->get(['name'])
+                ->first(fn (Location $location): bool => Str::slug($location->name) === $slug)
+                ?->name;
+
+            abort_if(blank($label), 404);
+        }
+
         $matchingPosts = $this->publicPosts()
             ->filter(function (Post $post) use ($type, $slug): bool {
                 $values = $type === 'location'
@@ -108,12 +120,12 @@ class PublicPostBrowseController extends Controller
             })
             ->values();
 
-        abort_if($matchingPosts->isEmpty(), 404);
+        if ($type === 'tag') {
+            abort_if($matchingPosts->isEmpty(), 404);
 
-        $label = $type === 'location'
-            ? trim((string) $matchingPosts->first()->location)
-            : collect($matchingPosts->first()->tags ?? [])
+            $label = collect($matchingPosts->first()->tags ?? [])
                 ->first(fn ($tag): bool => Str::slug((string) $tag) === $slug);
+        }
 
         $siteSettings = SiteSetting::current();
         $page = LengthAwarePaginator::resolveCurrentPage();

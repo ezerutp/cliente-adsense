@@ -1,6 +1,5 @@
 @php
     $contactButtons = collect($contactButtons ?? []);
-    $locationDirectory = \App\Support\PublicLocationDirectory::make();
 @endphp
 
 @extends('layouts.public-classic')
@@ -100,8 +99,5 @@
             </p>
         </section>
 
-        <div class="classic-shell classic-advertise-directory">
-            <x-classic-location-board :directory="$locationDirectory" />
-        </div>
     </main>
 @endsection

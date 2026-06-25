@@ -11,7 +11,7 @@ class PublicPostRelatedPostsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_it_shows_at_most_three_publicly_visible_related_posts(): void
+    public function test_it_shows_at_most_four_publicly_visible_related_posts(): void
     {
         $category = Category::query()->create([
             'name' => 'Categoría',
@@ -52,7 +52,7 @@ class PublicPostRelatedPostsTest extends TestCase
         $response->assertViewHas('relatedPosts', function ($relatedPosts): bool {
             $titles = $relatedPosts->pluck('title');
 
-            return $relatedPosts->count() === 3
+            return $relatedPosts->count() === 4
                 && $titles->every(fn (string $title): bool => str_starts_with($title, 'Relacionado'));
         });
     }

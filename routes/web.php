@@ -310,7 +310,7 @@ Route::get('/{category:slug}/{post:slug}', function (Category $category, Post $p
         ->standardCard()
         ->latest('published_at')
         ->latest('created_at')
-        ->limit(3)
+        ->limit(4)
         ->get()
         ->map(function (Post $relatedPost) use ($category, $siteSettings): array {
             $relatedTags = collect($relatedPost->tags ?? [])->map(fn (string $tag): string => mb_strtolower($tag));

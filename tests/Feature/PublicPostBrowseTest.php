@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use App\Models\Location;
 use App\Models\Post;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -154,5 +155,19 @@ class PublicPostBrowseTest extends TestCase
                     return true;
                 });
         }
+    }
+
+    public function test_location_route_shows_empty_state_when_location_exists_without_posts(): void
+    {
+        Location::query()->create([
+            'name' => 'San Miguel',
+            'department' => 'Lima Metropolitana',
+            'sort_order' => 1,
+        ]);
+
+        $this->get(route('posts.locations.show', ['location' => 'san-miguel']))
+            ->assertOk()
+            ->assertSee('San Miguel')
+            ->assertSee('No hay posts activos en esta ubicación.');
     }
 }
