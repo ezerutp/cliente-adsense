@@ -3,7 +3,6 @@
     $categories = collect($categories ?? []);
     $premiumListings = collect($premiumListings ?? []);
     $searchOptions = \App\Support\PublicSearchOptions::all();
-    $locationDirectory = \App\Support\PublicLocationDirectory::make();
 @endphp
 
 @extends('layouts.public-classic')
@@ -67,10 +66,6 @@
                 @endforelse
             </div>
         </section>
-
-        <div class="classic-shell">
-            <x-classic-location-board :directory="$locationDirectory" />
-        </div>
 
         <section class="classic-shell classic-intro">
             <h2>

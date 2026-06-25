@@ -27,16 +27,8 @@
             @endif
 
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                <div class="overflow-hidden">
-                    <table class="w-full table-fixed divide-y divide-gray-200">
-                        <colgroup>
-                            <col style="width: 31%;">
-                            <col style="width: 12%;">
-                            <col style="width: 11%;">
-                            <col style="width: 14%;">
-                            <col style="width: 11%;">
-                            <col style="width: 21%;">
-                        </colgroup>
+                <div class="overflow-x-auto">
+                    <table class="min-w-[980px] divide-y divide-gray-200 lg:min-w-full">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Post</th>
