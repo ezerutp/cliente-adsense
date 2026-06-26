@@ -46,7 +46,14 @@
 
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table class="w-full table-fixed divide-y divide-gray-200">
+                        <colgroup>
+                            <col style="width: 42%;">
+                            <col style="width: 22%;">
+                            <col style="width: 15%;">
+                            <col style="width: 10%;">
+                            <col style="width: 11%;">
+                        </colgroup>
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Video</th>
@@ -59,26 +66,29 @@
                         <tbody class="divide-y divide-gray-200 bg-white">
                             @forelse ($videoPosts as $videoPost)
                                 <tr>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-4">
-                                            <div class="aspect-video w-28 shrink-0 overflow-hidden rounded-md bg-gray-100">
-                                                <iframe
-                                                    src="{{ $videoPost->iframe_src }}"
-                                                    title="{{ $videoPost->title }}"
-                                                    class="h-full w-full"
-                                                    loading="lazy"
-                                                ></iframe>
+                                    <td class="max-w-0 px-6 py-4">
+                                        <div class="flex min-w-0 items-center gap-4 overflow-hidden">
+                                            <div class="aspect-video w-28 shrink-0 overflow-hidden rounded-md bg-gray-900">
+                                                @if ($videoPost->thumbnail_url)
+                                                    <img src="{{ $videoPost->thumbnail_url }}" alt="{{ $videoPost->title }}" class="h-full w-full object-cover">
+                                                @else
+                                                    <div class="grid h-full w-full place-items-center text-lg font-black tracking-widest text-white">XV</div>
+                                                @endif
                                             </div>
-                                            <div class="min-w-0">
-                                                <div class="truncate font-medium text-gray-900">{{ $videoPost->title }}</div>
+                                            <div class="min-w-0 flex-1 overflow-hidden">
+                                                <div class="truncate font-medium text-gray-900" title="{{ $videoPost->title }}">{{ $videoPost->title }}</div>
                                                 @if ($videoPost->description)
-                                                    <div class="mt-1 max-w-md truncate text-sm text-gray-500">{{ $videoPost->description }}</div>
+                                                    <div class="mt-1 truncate text-sm text-gray-500" title="{{ $videoPost->description }}">{{ $videoPost->description }}</div>
                                                 @endif
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-600">{{ $videoPost->slug }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-600">{{ $videoPost->published_at?->format('d/m/Y H:i') ?? 'Sin fecha' }}</td>
+                                    <td class="max-w-0 px-6 py-4 text-sm text-gray-600">
+                                        <div class="truncate" title="{{ $videoPost->slug }}">{{ $videoPost->slug }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">
+                                        <div class="truncate">{{ $videoPost->published_at?->format('d/m/Y H:i') ?? 'Sin fecha' }}</div>
+                                    </td>
                                     <td class="px-6 py-4">
                                         <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {{ $videoPost->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700' }}">
                                             {{ $videoPost->is_active ? 'Publicado' : 'Oculto' }}

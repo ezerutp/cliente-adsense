@@ -231,6 +231,33 @@
         return `<iframe src="https://www.xvideos.com/embedframe/${encodedId}" frameborder="0" width="510" height="400" scrolling="no" allowfullscreen="allowfullscreen"></iframe>`;
     }
 
+    function getThumbnailUrl() {
+        const candidates = [
+            document.querySelector('meta[property="og:image"]')?.getAttribute('content'),
+            document.querySelector('link[rel="image_src"]')?.getAttribute('href'),
+            matchPlayerValue('setThumbUrl169'),
+            matchPlayerValue('setThumbUrl'),
+            document.querySelector('#html5video img, .player img')?.getAttribute('src'),
+        ].filter(Boolean);
+
+        for (const candidate of candidates) {
+            const url = decodeHtml(String(candidate)).trim();
+
+            if (/^https?:\/\//i.test(url)) {
+                return url;
+            }
+        }
+
+        return '';
+    }
+
+    function matchPlayerValue(method) {
+        const escapedMethod = method.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const match = document.documentElement.innerHTML.match(new RegExp(`${escapedMethod}\\(['"]([^'"]+)['"]\\)`));
+
+        return match?.[1] || '';
+    }
+
     function getEncodedVideoId() {
         const linkInput = document.querySelector('#copy-video-link');
         const candidates = [
@@ -278,6 +305,7 @@
                 title: getTitle(),
                 description: '',
                 iframe,
+                thumbnail_url: getThumbnailUrl(),
                 is_active: true,
             },
         };

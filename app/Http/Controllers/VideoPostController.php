@@ -99,7 +99,7 @@ class VideoPostController extends Controller
     }
 
     /**
-     * @return array{title: string, slug?: string|null, description?: string|null, iframe_src: string, sort_order: int, is_active: bool, published_at: Carbon|null}
+     * @return array{title: string, slug?: string|null, description?: string|null, iframe_src: string, thumbnail_url?: string|null, sort_order: int, is_active: bool, published_at: Carbon|null}
      */
     private function validatedData(Request $request, ?VideoPost $videoPost = null): array
     {
@@ -113,6 +113,7 @@ class VideoPostController extends Controller
             ],
             'description' => ['nullable', 'string', 'max:2000'],
             'iframe' => ['required', 'string', 'max:5000'],
+            'thumbnail_url' => ['nullable', 'url:http,https', 'max:2048'],
             'sort_order' => ['required', 'integer', 'min:0', 'max:999999'],
             'published_at' => ['nullable', 'date'],
         ]);
@@ -130,6 +131,7 @@ class VideoPostController extends Controller
             'slug' => filled($data['slug'] ?? null) ? trim($data['slug']) : null,
             'description' => filled($data['description'] ?? null) ? trim($data['description']) : null,
             'iframe_src' => $iframeSrc,
+            'thumbnail_url' => filled($data['thumbnail_url'] ?? null) ? trim($data['thumbnail_url']) : null,
             'sort_order' => (int) $data['sort_order'],
             'is_active' => $request->boolean('is_active'),
             'published_at' => filled($data['published_at'] ?? null) ? Carbon::parse($data['published_at']) : now(),

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
     'slug',
     'description',
     'iframe_src',
+    'thumbnail_url',
     'sort_order',
     'is_active',
     'published_at',

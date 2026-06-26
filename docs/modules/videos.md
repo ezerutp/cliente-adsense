@@ -17,6 +17,7 @@ Campos:
 - Slug opcional.
 - Descripción.
 - Iframe del video.
+- URL de miniatura.
 - Orden.
 - Estado.
 - Fecha de publicación opcional.
@@ -30,6 +31,17 @@ El formulario acepta:
 
 El backend extrae y persiste solo `iframe_src`, validando que sea una URL
 HTTP/HTTPS. La vista renderiza un iframe controlado por la aplicación.
+
+## Miniaturas
+
+`thumbnail_url` es opcional. La administración y la galería pública usan la
+miniatura cuando existe; si falta, muestran un bloque `XV`.
+
+El userscript de Tampermonkey intenta capturar la miniatura desde:
+
+- `og:image`.
+- `setThumbUrl169`.
+- `setThumbUrl`.
 
 ## Galería pública
 
@@ -57,13 +69,15 @@ Payload mínimo:
   "admin_password": "password",
   "title": "Video demo",
   "description": "Descripción opcional",
-  "iframe": "<iframe src=\"https://www.youtube.com/embed/demo\"></iframe>"
+  "iframe": "<iframe src=\"https://www.youtube.com/embed/demo\"></iframe>",
+  "thumbnail_url": "https://example.com/thumb.jpg"
 }
 ```
 
 Campos opcionales:
 
 - `slug`.
+- `thumbnail_url`.
 - `sort_order`.
 - `is_active`.
 - `published_at`.

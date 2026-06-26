@@ -63,6 +63,19 @@
         <x-input-error class="mt-2" :messages="$errors->get('iframe')" />
     </div>
 
+    <div>
+        <x-input-label for="thumbnail_url" value="URL de miniatura" />
+        <x-text-input
+            id="thumbnail_url"
+            name="thumbnail_url"
+            type="url"
+            class="mt-1 block w-full"
+            :value="old('thumbnail_url', $videoPost?->thumbnail_url)"
+            placeholder="https://..."
+        />
+        <x-input-error class="mt-2" :messages="$errors->get('thumbnail_url')" />
+    </div>
+
     <div class="grid gap-6 sm:grid-cols-3">
         <div>
             <x-input-label for="sort_order" value="Orden" />
@@ -109,13 +122,11 @@
         <div class="rounded-lg border border-gray-200 p-4">
             <h3 class="text-sm font-semibold text-gray-900">Vista previa</h3>
             <div class="mt-4 aspect-video overflow-hidden rounded-md bg-gray-100">
-                <iframe
-                    src="{{ $videoPost->iframe_src }}"
-                    title="{{ $videoPost->title }}"
-                    class="h-full w-full"
-                    loading="lazy"
-                    allowfullscreen
-                ></iframe>
+                @if ($videoPost->thumbnail_url)
+                    <img src="{{ $videoPost->thumbnail_url }}" alt="{{ $videoPost->title }}" class="h-full w-full object-cover">
+                @else
+                    <div class="grid h-full w-full place-items-center bg-gray-900 text-3xl font-black tracking-widest text-white">XV</div>
+                @endif
             </div>
         </div>
     @endif
