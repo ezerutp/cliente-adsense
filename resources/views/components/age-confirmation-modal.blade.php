@@ -6,12 +6,21 @@
 <div
     x-data="{
         open: false,
+        ttl: 3 * 60 * 1000,
+        storageKey: @js($content['storageKey']),
         init() {
-            this.open = localStorage.getItem('{{ $content['storageKey'] }}') !== 'true';
+            const confirmedAt = Number(localStorage.getItem(this.storageKey));
+            const isConfirmed = Number.isFinite(confirmedAt) && Date.now() - confirmedAt < this.ttl;
+
+            if (! isConfirmed) {
+                localStorage.removeItem(this.storageKey);
+            }
+
+            this.open = ! isConfirmed;
             document.documentElement.classList.toggle('overflow-hidden', this.open);
         },
         confirm() {
-            localStorage.setItem('{{ $content['storageKey'] }}', 'true');
+            localStorage.setItem(this.storageKey, Date.now().toString());
             this.open = false;
             document.documentElement.classList.remove('overflow-hidden');
         }

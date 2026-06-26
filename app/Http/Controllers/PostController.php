@@ -255,8 +255,11 @@ class PostController extends Controller
         $data['tags'] = $this->tagsToArray($data['tags'] ?? null);
         $data = array_merge($data, $this->buildContactUrls($data));
         $data['is_active'] = $request->boolean('is_active');
+        $data['ends_at'] = filled($data['ends_at'] ?? null)
+            ? $this->localDateTimeToUtc($data['ends_at'])
+            : null;
         $data['published_at'] = $data['publish_mode'] === 'scheduled'
-            ? $data['published_at']
+            ? $this->localDateTimeToUtc($data['published_at'])
             : now();
 
         unset($data['publish_mode'], $data['cover_image_file'], $data['gallery_image_files']);
@@ -310,7 +313,7 @@ class PostController extends Controller
             return;
         }
 
-        $endsAt = Carbon::parse($data['ends_at']);
+        $endsAt = $this->localDateTimeToUtc($data['ends_at']);
 
         if ($data['publish_mode'] === 'immediate' && $endsAt->lessThanOrEqualTo(now())) {
             throw ValidationException::withMessages([
@@ -321,12 +324,22 @@ class PostController extends Controller
         if (
             $data['publish_mode'] === 'scheduled'
             && ! empty($data['published_at'])
-            && $endsAt->lessThanOrEqualTo(Carbon::parse($data['published_at']))
+            && $endsAt->lessThanOrEqualTo($this->localDateTimeToUtc($data['published_at']))
         ) {
             throw ValidationException::withMessages([
                 'ends_at' => 'La fecha de finalización debe ser posterior a la fecha de publicación.',
             ]);
         }
+    }
+
+    private function localDateTimeToUtc(string $value): Carbon
+    {
+        return Carbon::parse($value, $this->dateTimeInputTimezone())->utc();
+    }
+
+    private function dateTimeInputTimezone(): string
+    {
+        return SiteSetting::current()->server_utc_offset ?: config('app.timezone');
     }
 
     private function tagsToArray(?string $value): array

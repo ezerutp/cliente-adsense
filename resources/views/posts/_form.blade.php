@@ -5,12 +5,13 @@
     $integrations = collect($integrations ?? []);
     $locations = collect($locations ?? []);
     $cardTemplates = collect($cardTemplates ?? []);
+    $siteSettings = \App\Models\SiteSetting::current();
+    $dateTimeInputTimezone = $siteSettings->server_utc_offset ?: config('app.timezone');
     $galleryValue = old('gallery_image_urls', $post ? implode("\n", $post->gallery_image_urls ?? []) : '');
     $tagsValue = old('tags', $post ? implode(', ', $post->tags ?? []) : '');
     $publishMode = old('publish_mode', $post?->published_at?->isFuture() ? 'scheduled' : 'immediate');
-    $publishedAtValue = old('published_at', $post?->published_at?->format('Y-m-d\TH:i'));
-    $endsAtValue = old('ends_at', $post?->ends_at?->format('Y-m-d\TH:i'));
-    $siteSettings = \App\Models\SiteSetting::current();
+    $publishedAtValue = old('published_at', $post?->published_at?->copy()->setTimezone($dateTimeInputTimezone)->format('Y-m-d\TH:i'));
+    $endsAtValue = old('ends_at', $post?->ends_at?->copy()->setTimezone($dateTimeInputTimezone)->format('Y-m-d\TH:i'));
     $defaultDialCode = \App\Models\SiteSetting::SERVER_COUNTRIES[$siteSettings->server_country]['dial_code'] ?? '51';
     $postCardColorSuggestions = $postCardColorSuggestions ?? ['byTitle' => [], 'colors' => []];
     $postCardsValue = old('post_cards');
