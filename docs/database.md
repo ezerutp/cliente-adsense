@@ -38,6 +38,21 @@ ends_at
 
 `location` es obligatorio desde la migración del 18 de junio de 2026.
 
+### `video_posts`
+
+```text
+title
+slug
+description
+iframe_src
+sort_order
+is_active
+published_at
+```
+
+El formulario y el endpoint JSON aceptan un iframe completo o una URL. El
+backend extrae y guarda únicamente el `src` validado con esquema HTTP/HTTPS.
+
 ### `locations`
 
 ```text

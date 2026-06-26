@@ -21,7 +21,7 @@ Recibe todos los permisos.
 
 ### Editor
 
-Recibe permisos de contenido para posts, categorías, cards e integraciones.
+Recibe permisos de contenido para posts, videos, categorías, cards e integraciones.
 
 ### Viewer
 
@@ -54,6 +54,7 @@ se autorizan exclusivamente según los permisos asignados.
 Se crean permisos para:
 
 - Posts.
+- Videos.
 - Categorías.
 - Cards.
 - Integraciones.

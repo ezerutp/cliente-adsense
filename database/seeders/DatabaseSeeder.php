@@ -34,6 +34,13 @@ class DatabaseSeeder extends Seeder
             'posts.edit',
             'posts.delete',
             'posts.publish',
+
+            // Videos
+            'videos.view',
+            'videos.create',
+            'videos.edit',
+            'videos.delete',
+            'videos.publish',
             
             // Categorías
             'categories.view',
@@ -89,6 +96,11 @@ class DatabaseSeeder extends Seeder
             'posts.edit',
             'posts.delete',
             'posts.publish',
+            'videos.view',
+            'videos.create',
+            'videos.edit',
+            'videos.delete',
+            'videos.publish',
             'categories.view',
             'categories.create',
             'categories.edit',
@@ -106,6 +118,7 @@ class DatabaseSeeder extends Seeder
         $viewerRole = Role::firstOrCreate(['name' => 'viewer']);
         $viewerRole->syncPermissions([
             'posts.view',
+            'videos.view',
             'categories.view',
             'cards.view',
             'integrations.view',

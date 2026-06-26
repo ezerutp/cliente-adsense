@@ -27,6 +27,11 @@
                             {{ __('Posts') }}
                         </x-nav-link>
                     @endcan
+                    @can('videos.view')
+                        <x-nav-link :href="route('video-posts.index')" :active="request()->routeIs('video-posts.*')">
+                            {{ __('Videos') }}
+                        </x-nav-link>
+                    @endcan
                     @can('cards.view')
                         <x-nav-link :href="route('post-cards.index')" :active="request()->routeIs('post-cards.*')">
                             {{ __('Cards') }}
@@ -105,6 +110,11 @@
             @can('posts.view')
                 <x-responsive-nav-link :href="route('posts.index')" :active="request()->routeIs('posts.*')">
                     {{ __('Posts') }}
+                </x-responsive-nav-link>
+            @endcan
+            @can('videos.view')
+                <x-responsive-nav-link :href="route('video-posts.index')" :active="request()->routeIs('video-posts.*')">
+                    {{ __('Videos') }}
                 </x-responsive-nav-link>
             @endcan
             @can('cards.view')

@@ -4,6 +4,7 @@
 | --- | --- |
 | [Experiencia pública](public-experience.md) | Inicio, búsqueda, directorios y navegación |
 | [Posts](posts.md) | Ciclo de publicación, detalle, galería y contactos |
+| [Videos](videos.md) | Galería de videos embebidos por iframe |
 | [Categorías](categories.md) | Agrupación principal y páginas públicas |
 | [Cards](post-cards.md) | Plantillas y bloques informativos |
 | [Integraciones](integrations.md) | Canales de contacto |

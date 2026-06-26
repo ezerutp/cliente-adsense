@@ -9,6 +9,7 @@
 
         <nav class="classic-desktop-nav" aria-label="Navegación principal">
             <a href="{{ url('/') }}">Inicio</a>
+            <a href="{{ route('video-posts.public.index') }}">Videos</a>
             <a href="{{ route('posts.locations.index') }}">Ubicaciones</a>
             <a href="{{ route('posts.tags.index') }}">Etiquetas</a>
             @auth
@@ -42,6 +43,7 @@
     <div x-show="open" x-cloak x-transition class="classic-mobile-menu">
         <div class="classic-shell grid gap-1 py-3">
             <a href="{{ url('/') }}">Inicio</a>
+            <a href="{{ route('video-posts.public.index') }}">Videos</a>
             <a href="{{ route('posts.locations.index') }}">Ubicaciones</a>
             <a href="{{ route('posts.tags.index') }}">Etiquetas</a>
             @auth

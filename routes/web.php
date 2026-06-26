@@ -9,6 +9,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicPostBrowseController;
 use App\Http\Controllers\PublicPostSearchController;
 use App\Http\Controllers\SiteSettingController;
+use App\Http\Controllers\VideoPostController;
 use App\Http\Middleware\DiagnoseImageUploads;
 use App\Models\AgeGateSetting;
 use App\Models\Category;
@@ -17,6 +18,7 @@ use App\Models\Location;
 use App\Models\Post;
 use App\Models\PostCard;
 use App\Models\SiteSetting;
+use App\Models\VideoPost;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
@@ -206,12 +208,12 @@ Route::get('/dashboard', function () {
             'tone' => 'blue',
         ],
         [
-            'label' => 'Integraciones',
-            'value' => Integration::query()->where('is_active', true)->count(),
-            'detail' => 'Canales activos',
-            'icon' => 'heroicon-o-bolt',
-            'href' => route('integrations.index'),
-            'tone' => 'pink',
+            'label' => 'Videos públicos',
+            'value' => VideoPost::query()->publiclyVisible()->count(),
+            'detail' => 'Galería activa',
+            'icon' => 'heroicon-o-video-camera',
+            'href' => route('video-posts.index'),
+            'tone' => 'blue',
         ],
     ];
 
@@ -337,6 +339,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('permission:posts.delete')
         ->name('posts.destroy');
 
+    Route::patch('dashboard/videos/{videoPost}/toggle-visibility', [VideoPostController::class, 'toggleVisibility'])
+        ->middleware('permission:videos.publish')
+        ->name('video-posts.toggle-visibility');
+    Route::get('dashboard/videos', [VideoPostController::class, 'index'])
+        ->middleware('permission:videos.view')
+        ->name('video-posts.index');
+    Route::get('dashboard/videos/create', [VideoPostController::class, 'create'])
+        ->middleware('permission:videos.create')
+        ->name('video-posts.create');
+    Route::post('dashboard/videos', [VideoPostController::class, 'store'])
+        ->middleware('permission:videos.create')
+        ->name('video-posts.store');
+    Route::get('dashboard/videos/{videoPost}/edit', [VideoPostController::class, 'edit'])
+        ->middleware('permission:videos.edit')
+        ->name('video-posts.edit');
+    Route::match(['put', 'patch'], 'dashboard/videos/{videoPost}', [VideoPostController::class, 'update'])
+        ->middleware('permission:videos.edit')
+        ->name('video-posts.update');
+    Route::delete('dashboard/videos/{videoPost}', [VideoPostController::class, 'destroy'])
+        ->middleware('permission:videos.delete')
+        ->name('video-posts.destroy');
+
     Route::patch('dashboard/post-cards/{postCard}/toggle-visibility', [PostCardController::class, 'toggleVisibility'])
         ->middleware('permission:cards.publish')
         ->name('post-cards.toggle-visibility');
@@ -441,6 +465,9 @@ Route::get('/publicar-anuncio', function () {
 
     return view('advertise', compact('ageGate', 'contactButtons', 'siteSettings'));
 })->name('advertise');
+
+Route::get('/videos', [VideoPostController::class, 'publicIndex'])
+    ->name('video-posts.public.index');
 
 Route::get('/u', [PublicPostBrowseController::class, 'locations'])
     ->name('posts.locations.index');
