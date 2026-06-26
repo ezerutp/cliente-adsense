@@ -13,8 +13,11 @@ use App\Http\Middleware\DiagnoseImageUploads;
 use App\Models\AgeGateSetting;
 use App\Models\Category;
 use App\Models\Integration;
+use App\Models\Location;
 use App\Models\Post;
+use App\Models\PostCard;
 use App\Models\SiteSetting;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 
@@ -106,7 +109,184 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $publicPosts = fn () => Post::query()
+        ->whereHas('category', fn ($query) => $query->where('is_active', true))
+        ->publiclyVisible();
+
+    $metrics = [
+        [
+            'label' => 'Posts públicos',
+            'value' => $publicPosts()->count(),
+            'detail' => 'Visibles ahora',
+            'icon' => 'heroicon-o-eye',
+            'href' => route('posts.index'),
+            'tone' => 'green',
+        ],
+        [
+            'label' => 'VIP activos',
+            'value' => $publicPosts()->where('is_vip', true)->count(),
+            'detail' => 'Destacados públicos',
+            'icon' => 'heroicon-o-star',
+            'href' => route('posts.index'),
+            'tone' => 'amber',
+        ],
+        [
+            'label' => 'Programados',
+            'value' => Post::query()
+                ->where('is_active', true)
+                ->whereNotNull('published_at')
+                ->where('published_at', '>', now())
+                ->count(),
+            'detail' => 'Pendientes de publicar',
+            'icon' => 'heroicon-o-clock',
+            'href' => route('posts.index'),
+            'tone' => 'yellow',
+        ],
+        [
+            'label' => 'Por vencer',
+            'value' => $publicPosts()
+                ->whereNotNull('ends_at')
+                ->whereBetween('ends_at', [now(), now()->addDays(7)])
+                ->count(),
+            'detail' => 'Próximos 7 días',
+            'icon' => 'heroicon-o-calendar-days',
+            'href' => route('posts.index'),
+            'tone' => 'red',
+        ],
+        [
+            'label' => 'Sin contacto',
+            'value' => $publicPosts()
+                ->whereNull('whatsapp_url')
+                ->whereNull('telegram_url')
+                ->whereNull('sms_url')
+                ->count(),
+            'detail' => 'Revisar conversión',
+            'icon' => 'heroicon-o-chat-bubble-left-right',
+            'href' => route('posts.index'),
+            'tone' => 'red',
+        ],
+        [
+            'label' => 'Sin portada',
+            'value' => $publicPosts()
+                ->where(fn ($query) => $query->whereNull('cover_image_url')->orWhere('cover_image_url', ''))
+                ->count(),
+            'detail' => 'Calidad visual',
+            'icon' => 'heroicon-o-photo',
+            'href' => route('posts.index'),
+            'tone' => 'gray',
+        ],
+        [
+            'label' => 'Categorías activas',
+            'value' => Category::query()->where('is_active', true)->count(),
+            'detail' => 'Disponibles al público',
+            'icon' => 'heroicon-o-squares-2x2',
+            'href' => route('categories.index'),
+            'tone' => 'indigo',
+        ],
+        [
+            'label' => 'Categorías vacías',
+            'value' => Category::query()
+                ->where('is_active', true)
+                ->whereDoesntHave('posts', fn ($query) => $query->publiclyVisible())
+                ->count(),
+            'detail' => 'Sin posts públicos',
+            'icon' => 'heroicon-o-folder-open',
+            'href' => route('categories.index'),
+            'tone' => 'gray',
+        ],
+        [
+            'label' => 'Ubicaciones activas',
+            'value' => $publicPosts()
+                ->whereNotNull('location')
+                ->distinct('location')
+                ->count('location'),
+            'detail' => 'Con posts visibles',
+            'icon' => 'heroicon-o-map-pin',
+            'href' => route('settings.edit').'#locations',
+            'tone' => 'blue',
+        ],
+        [
+            'label' => 'Integraciones',
+            'value' => Integration::query()->where('is_active', true)->count(),
+            'detail' => 'Canales activos',
+            'icon' => 'heroicon-o-bolt',
+            'href' => route('integrations.index'),
+            'tone' => 'pink',
+        ],
+    ];
+
+    $topCategories = Category::query()
+        ->where('is_active', true)
+        ->withCount([
+            'posts as public_posts_count' => fn ($query) => $query->publiclyVisible(),
+        ])
+        ->orderByDesc('public_posts_count')
+        ->orderBy('name')
+        ->limit(5)
+        ->get(['id', 'name', 'slug']);
+
+    $topLocations = $publicPosts()
+        ->select('location', DB::raw('count(*) as posts_count'))
+        ->whereNotNull('location')
+        ->groupBy('location')
+        ->orderByDesc('posts_count')
+        ->orderBy('location')
+        ->limit(5)
+        ->get();
+
+    $latestPosts = $publicPosts()
+        ->with('category')
+        ->latest('published_at')
+        ->latest('created_at')
+        ->limit(6)
+        ->get();
+
+    $upcomingExpirations = $publicPosts()
+        ->with('category')
+        ->whereNotNull('ends_at')
+        ->whereBetween('ends_at', [now(), now()->addDays(7)])
+        ->orderBy('ends_at')
+        ->limit(6)
+        ->get();
+
+    $alerts = [
+        [
+            'label' => 'Posts públicos sin contacto',
+            'value' => $metrics[4]['value'],
+            'href' => route('posts.index'),
+        ],
+        [
+            'label' => 'Posts públicos sin portada',
+            'value' => $metrics[5]['value'],
+            'href' => route('posts.index'),
+        ],
+        [
+            'label' => 'Categorías activas sin posts',
+            'value' => $metrics[7]['value'],
+            'href' => route('categories.index'),
+        ],
+        [
+            'label' => 'Plantillas de cards activas',
+            'value' => PostCard::query()->whereNull('post_id')->where('is_active', true)->count(),
+            'href' => route('post-cards.index'),
+        ],
+        [
+            'label' => 'Ubicaciones sin uso',
+            'value' => Location::query()
+                ->whereNotIn('name', $publicPosts()->select('location')->whereNotNull('location'))
+                ->count(),
+            'href' => route('settings.edit').'#locations',
+        ],
+    ];
+
+    return view('dashboard', compact(
+        'alerts',
+        'latestPosts',
+        'metrics',
+        'topCategories',
+        'topLocations',
+        'upcomingExpirations',
+    ));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
